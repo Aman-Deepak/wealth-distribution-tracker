@@ -1,0 +1,127 @@
+Date, Folio Number, Name of the Fund, Order, Units, NAV, Current Nav, Amount (INR)
+    2025-03-17,91096784575,Motilal Oswal Midcap Growth Direct Plan,buy,59.029,101.6395,98.8741,5999.7
+    2025-03-17,4.77389E+11,Nippon India Small Cap Growth Direct Plan,buy,18.866,159.0109,160.1016,2999.85
+    2025-03-03,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,72.381,82.891,82.0594,5999.7
+    2025-03-03,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,39.153,153.2369,156.0901,5999.7
+    2025-02-27,91096784575,Motilal Oswal Midcap Growth Direct Plan,buy,29.344,102.2294,98.8741,2999.85
+    2025-02-17,4.77389E+11,Nippon India Small Cap Growth Direct Plan,buy,18.476,162.3655,160.1016,2999.85
+    2025-02-03,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,68.663,87.379,82.0594,5999.7
+    2025-02-03,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,37.108,161.6828,156.0901,5999.7
+    2025-01-15,4.77389E+11,Nippon India Small Cap Growth Direct Plan,buy,16.41,182.8091,160.1016,2999.85
+    2025-01-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,68.221,87.9456,82.0594,5999.7
+    2025-01-01,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,36.552,164.142,156.0901,5999.7
+    2024-12-17,91096784575,Motilal Oswal Midcap Growth Direct Plan,buy,23.019,130.3184,98.8741,2999.85
+    2024-12-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,68.738,87.2842,82.0594,5999.7
+    2024-12-02,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,35.743,167.8545,156.0901,5999.7
+    2024-11-04,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,69.956,85.7645,82.0594,5999.7
+    2024-11-04,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,36.174,165.8578,156.0901,5999.7
+    2024-10-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,67.681,88.6465,82.0594,5999.7
+    2024-10-01,5.7734E+11,UTI Nifty 50 Index Growth Direct Plan,buy,33.678,178.1478,156.0901,5999.7
+    2024-08-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,55.406,54.143,52.668,2999.85
+    2024-08-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,70.303,85.3407,83.4186,5999.7
+    2024-08-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,34.795,172.4282,167.6415,5999.7
+    2024-07-02,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,57.873,51.835,52.668,2999.85
+    2024-07-02,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,sell,60.161,166.222,167.6415,10000
+    2024-07-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,sell,121.176,82.5255,83.4186,10000
+    2024-07-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,72.719,82.5054,83.4186,5999.7
+    2024-07-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,36.067,166.3475,167.6415,5999.7
+    2024-06-03,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,60.882,49.273,52.668,2999.85
+    2024-06-03,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,75.604,79.3574,83.4186,5999.7
+    2024-06-03,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,37.486,160.0537,167.6415,5999.7
+    2024-05-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.216,2466.3596,2521.6461,2999.85
+    2024-05-02,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,62.731,47.821,52.668,2999.85
+    2024-05-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,51.586,77.5363,83.4186,3999.8
+    2024-05-02,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,32.192,155.3104,167.6415,4999.75
+    2024-04-29,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,sell,13.911,2463.7537,2521.6461,34273.28
+    2024-04-02,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,64.612,46.429,52.668,2999.85
+    2024-03-19,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,428.951,149.6601,167.6415,64196.79
+    2024-03-19,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,sell,428.976,149.6601,167.6415,64200
+    2024-03-15,7452717/58,Tata Digital India Growth Direct Plan,buy,226.508,49.8147,55.9382,11283.44
+    2024-03-15,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,457.952,73.6088,83.4186,33709.31
+    2024-03-15,7452717/58,Tata Digital India Growth Direct Plan,sell,226.522,49.8147,55.9382,11284
+    2024-03-15,11468217,Parag Parikh Flexi Cap Growth Direct Plan,sell,455,73.6088,83.4186,33491.67
+    2024-03-04,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.23,2438.9181,2521.6461,2999.85
+    2024-03-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,64.912,46.214,52.668,2999.85
+    2024-02-06,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.237,2425.4079,2521.6461,2999.85
+    2024-02-02,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,66.691,44.981,52.668,2999.85
+    2024-01-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.245,2408.8666,2521.6461,2999.85
+    2024-01-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,67.393,44.513,52.668,2999.85
+    2024-01-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,56.765,70.4621,83.4186,3999.8
+    2024-01-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,33.566,148.9515,167.6415,4999.75
+    2023-12-04,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.254,2391.4869,2521.6461,2999.85
+    2023-12-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,72.385,41.443,52.668,2999.85
+    2023-12-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,59.539,67.1793,83.4186,3999.8
+    2023-12-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,36,138.8812,167.6415,4999.75
+    2023-11-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.261,2379.5504,2521.6461,2999.85
+    2023-11-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,63.392,63.0959,83.4186,3999.8
+    2023-11-02,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,38.14,131.0911,167.6415,4999.75
+    2023-11-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,78.335,38.295,52.668,2999.85
+    2023-10-04,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.266,2369.6517,2521.6461,2999.85
+    2023-10-04,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,75.974,39.485,52.668,2999.85
+    2023-10-04,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,64.333,62.1734,83.4186,3999.8
+    2023-10-04,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,37.59,133.0068,167.6415,4999.75
+    2023-09-05,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.271,2360.9074,2521.6461,2999.85
+    2023-09-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,75.504,39.731,52.668,2999.85
+    2023-09-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,64.703,61.8175,83.4186,3999.8
+    2023-09-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,37.582,133.0351,167.6415,4999.75
+    2023-08-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.278,2347.3439,2521.6461,2999.85
+    2023-08-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,76.295,39.319,52.668,2999.85
+    2023-07-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.286,2333.1829,2521.6461,2999.85
+    2023-07-03,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,79.553,37.709,52.668,2999.85
+    2023-07-03,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,66.748,59.9238,83.4186,3999.8
+    2023-07-03,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,37.923,131.8385,167.6415,4999.75
+    2023-06-06,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.287,2330.0706,2521.6461,2999.85
+    2023-06-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,83.61,35.879,52.668,2999.85
+    2023-06-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,68.989,57.9777,83.4186,3999.8
+    2023-06-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,39.687,125.9784,167.6415,4999.75
+    2023-05-03,9.10E+11,Axis Banking & PSU Debt Growth Direct Plan,buy,1.296,2313.972,2521.6461,2999.85
+    2023-05-02,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,85.993,34.885,52.668,2999.85
+    2023-05-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,71.366,56.0465,83.4186,3999.8
+    2023-05-02,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,40.53,123.359,167.6415,4999.75
+    2023-04-05,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,88.921,33.736,52.668,2999.85
+    2023-04-05,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,74.351,53.796,83.4186,3999.8
+    2023-04-05,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,41.903,119.3172,167.6415,4999.75
+    2023-02-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,76.443,52.3241,83.4186,3999.8
+    2023-02-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,41.776,119.6792,167.6415,4999.75
+    2023-01-19,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,577.739,34.616,52.668,19999
+    2023-01-16,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,sell,169,121.5633,167.6415,20543.99
+    2023-01-03,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,143.461,34.851,52.668,4999.75
+    2022-12-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,139.455,35.852,52.668,4999.75
+    2022-12-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,75.468,53.0001,83.4186,3999.8
+    2022-12-01,7452717/58,Tata Digital India Growth Direct Plan,buy,26.286,38.0418,55.9382,999.95
+    2022-12-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,39.112,127.8321,167.6415,4999.75
+    2022-10-04,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,149.859,33.363,52.668,4999.75
+    2022-10-04,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,79.085,50.5757,83.4186,3999.8
+    2022-10-04,7452717/58,Tata Digital India Growth Direct Plan,buy,29.179,34.27,55.9382,999.95
+    2022-10-04,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,42.638,117.2595,167.6415,4999.75
+    2022-09-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,147.329,33.936,52.668,4999.75
+    2022-09-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,78.227,51.1309,83.4186,3999.8
+    2022-09-01,7452717/58,Tata Digital India Growth Direct Plan,buy,28.842,34.6694,55.9382,999.95
+    2022-09-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,41.979,119.1008,167.6415,4999.75
+    2022-08-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,78.96,50.6558,83.4186,3999.8
+    2022-08-01,7452717/58,Tata Digital India Growth Direct Plan,buy,28.096,35.5911,55.9382,999.95
+    2022-08-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,42.545,117.5158,167.6415,4999.75
+    2022-08-01,77759473284,Mirae Asset ELSS Tax Saver Growth Direct Plan,buy,149.242,33.501,52.668,4999.75
+    2022-07-15,7452717/58,Tata Digital India Growth Direct Plan,buy,61.202,32.6768,55.9382,1999.9
+    2022-07-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,85.452,46.8073,83.4186,3999.8
+    2022-06-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,81.171,49.2763,83.4186,3999.8
+    2022-05-04,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,80.563,49.6482,83.4186,3999.8
+    2022-05-04,7452717/58,Tata Digital India Growth Direct Plan,buy,27.009,37.0233,55.9382,999.95
+    2022-05-04,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,44.525,112.2908,167.6415,4999.75
+    2022-04-20,7452717/58,Tata Digital India Growth Direct Plan,buy,25.888,38.6264,55.9382,999.95
+    2022-04-05,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,73.008,54.7857,83.4186,3999.8
+    2022-04-05,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,41.358,120.8889,167.6415,4999.75
+    2022-03-07,7452717/58,Tata Digital India Growth Direct Plan,buy,24.909,40.1436,55.9382,999.95
+    2022-03-02,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,80.179,49.8861,83.4186,3999.8
+    2022-03-02,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,44.716,111.8124,167.6415,4999.75
+    2022-02-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,75.029,53.3101,83.4186,3999.8
+    2022-02-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,42.309,118.1711,167.6415,4999.75
+    2022-01-25,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,43.039,116.1675,167.6415,4999.75
+    2022-01-03,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,73.272,54.5884,83.4186,3999.8
+    2022-01-03,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,42.197,118.485,167.6415,4999.75
+    2021-12-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,75.395,53.0511,83.4186,3999.8
+    2021-12-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,43.327,115.3965,167.6415,4999.75
+    2021-11-01,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,74.359,53.7905,83.4186,3999.8
+    2021-11-01,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,41.501,120.4718,167.6415,4999.75
+    2021-09-06,11468217,Parag Parikh Flexi Cap Growth Direct Plan,buy,78.148,51.1825,83.4186,3999.8
+    2021-09-06,5.77E+11,UTI Nifty 50 Index Growth Direct Plan,buy,42.874,116.6162,167.6415,4999.75

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Financial Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --ink:#1f2d3d; --muted:#6b7b8c; --brand:#0f4c75; --brand-2:#3282b8; --ring: rgba(15,76,117,0.12);
+  --radius:16px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;padding:28px 28px 24px;box-shadow:var(--shadow)}
+header h1{margin:0;font-weight:700;font-size:28px}
+header p{margin:8px 0 0;opacity:.9;font-size:13px}
+.wrap{padding:22px;max-width:1200px;margin:0 auto}
+
+/* Summary cards */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:22px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;overflow:hidden}
+.card .icon{font-size:22px;margin-bottom:8px}
+.card h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.card p{margin:0;font-weight:700;font-size:22px;color:var(--brand)}
+
+/* Insights */
+.insights{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:22px}
+.insights h3{margin:0 0 8px;font-size:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#eef5fb;color:#0b3c5d;font-weight:600;font-size:12px}
+
+/* Charts */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.row-3cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:900px){.row,.row-3cols{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.chart-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.chart-wrap{position:relative;width:100%;height:340px}
+
+.full-chart{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:22px}
+.full-chart h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.full-chart .chart-wrap{height:320px}
+
+/* Table */
+.table-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:26px}
+.table-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.table-scroll{overflow:auto;border:1px solid #e6ebf1;border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{padding:10px 12px;border-bottom:1px solid #ecf0f3}
+th{background:#0f4c75;color:#fff;position:sticky;top:0;text-align:left}
+tr:nth-child(even){background:#fafcfe}
+tr:hover{background:#eef5fb}
+.category-badge{display:inline-block;padding:4px 10px;border-radius:999px;color:#fff;font-weight:700;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>Financial Report</h1>
+<p>Generated on: 2025-08-24 17:16</p>
+</header>
+<main class="wrap">
+
+<!-- Summary -->
+<section class="summary">
+
+<div class="card">
+  <div class="icon">💰</div>
+  <h3>Total Wealth</h3>
+  <p>₹1,291,614.62</p>
+</div>
+
+<div class="card">
+  <div class="icon">💰</div>
+  <h3>Total Liquid Wealth</h3>
+  <p>₹783,513.62</p>
+</div>
+
+<div class="card">
+  <div class="icon">💰</div>
+  <h3>Total Loan</h3>
+  <p>₹148,730.00</p>
+</div>
+
+<div class="card">
+  <div class="icon">🏛️</div>
+  <h3>Current Bank Balance</h3>
+  <p>₹61,506.00</p>
+</div>
+
+</section>
+
+<!-- Insights -->
+<section class="insights">
+<h3>Insights</h3>
+<p>
+
+
+Avg Monthly Expense: <span class="pill">₹53,926.60</span>. 
+YoY Expense: <span class="pill">28.77%%</span>. 
+
+Concentration Risk: <span class="pill">23.51%</span>. 
+Top Asset: <span class="pill">Mirae Asset ELSS Tax Saver Growth Direct Plan (45.03%)</span>. 
+Largest Holding: <span class="pill">EPF (₹303,686.00)</span>. 
+</p>
+</section>
+
+<!-- Row 1: Expense Charts -->
+<section class="row">
+  <div class="chart-card">
+    <h2>Expense Breakdown by Type</h2>
+    <div class="chart-wrap"><canvas id="expensePie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Fiscal Year Expense Breakdown</h2>
+    <div class="chart-wrap"><canvas id="expenseFY"></canvas></div>
+  </div>
+</section>
+
+<!-- Row 2: Investment Pie Charts -->
+<section class="row-3cols">
+  <div class="chart-card">
+    <h2>Investments</h2>
+    <div class="chart-wrap"><canvas id="investPie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Portfolio</h2>
+    <div class="chart-wrap"><canvas id="portfolioPie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Retirement</h2>
+    <div class="chart-wrap"><canvas id="retirementPie"></canvas></div>
+  </div>
+</section>
+
+<!-- Row 3: Monthly Trends -->
+<section class="full-chart">
+  <h2>Monthly Trends</h2>
+  <div class="chart-wrap"><canvas id="monthlyTrends"></canvas></div>
+</section>
+
+<!-- Tables -->
+<section class="table-card">
+  <h2>Expense Table</h2>
+  <div class="table-scroll"><h3></h3>
+<table class="dataframe table table-sm table-bordered">
+  <thead>
+    <tr style="text-align: left;">
+      <th>FISCAL_YEAR</th>
+      <th>TYPE</th>
+      <th>COST</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2021-2022</td>
+      <td>HOME</td>
+      <td>115,074.98</td>
+    </tr>
+    <tr>
+      <td>2021-2022</td>
+      <td>PERSONAL</td>
+      <td>112,078.02</td>
+    </tr>
+    <tr>
+      <td>2021-2022</td>
+      <td>TRIP</td>
+      <td>15,000.00</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>PERSONAL</td>
+      <td>436,680.19</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>HOME</td>
+      <td>128,215.00</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>TRIP</td>
+      <td>122,000.00</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>PERSONAL</td>
+      <td>360,134.63</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>HOME</td>
+      <td>213,521.00</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>TRIP</td>
+      <td>151,723.00</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>PERSONAL</td>
+      <td>502,657.08</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>HOME</td>
+      <td>230,902.00</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>TRIP</td>
+      <td>200,491.00</td>
+    </tr>
+  </tbody>
+</table></div>
+</section>
+<section class="table-card">
+  <h2>Savings Table</h2>
+  <div class="table-scroll"><h3></h3>
+<table class="dataframe table table-sm table-bordered">
+  <thead>
+    <tr style="text-align: left;">
+      <th>TYPE</th>
+      <th>NAME</th>
+      <th>T_BUY</th>
+      <th>T_SELL</th>
+      <th>PROFIT_BOOKED</th>
+      <th>CURRENT_INVESTED</th>
+      <th>CURRENT_VALUE</th>
+      <th>PROFIT_LOSS</th>
+      <th>RETURN_PERCENTAGE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bank</td>
+      <td>HDFC</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>61,506.00</td>
+      <td>61,506.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Axis Banking & PSU Debt Growth Direct Plan</td>
+      <td>35,998.20</td>
+      <td>34,273.28</td>
+      <td>1,275.00</td>
+      <td>2,999.85</td>
+      <td>3,335.47</td>
+      <td>335.62</td>
+      <td>11.19</td>
+    </tr>
+    <tr>
+      <td>PROVIDENTFUND</td>
+      <td>EPF</td>
+      <td>270,495.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>270,495.00</td>
+      <td>303,686.00</td>
+      <td>33,191.00</td>
+      <td>12.27</td>
+    </tr>
+    <tr>
+      <td>PROVIDENTFUND</td>
+      <td>EPS</td>
+      <td>55,369.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>55,369.00</td>
+      <td>55,369.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>LIC</td>
+      <td>LIC_22_44</td>
+      <td>28,545.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>28,545.00</td>
+      <td>28,545.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Mirae Asset ELSS Tax Saver Growth Direct Plan</td>
+      <td>95,995.20</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>95,995.20</td>
+      <td>139,222.29</td>
+      <td>43,227.09</td>
+      <td>45.03</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Motilal Oswal Midcap Growth Direct Plan</td>
+      <td>11,999.40</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>11,999.40</td>
+      <td>13,334.73</td>
+      <td>1,335.33</td>
+      <td>11.13</td>
+    </tr>
+    <tr>
+      <td>BONDS</td>
+      <td>MOTILAL_OSWAL_FINANCIAL_SERVICE_LIMITED</td>
+      <td>30,000.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>30,000.00</td>
+      <td>30,000.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Nippon India Small Cap Growth Direct Plan</td>
+      <td>8,999.55</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>8,999.55</td>
+      <td>10,172.87</td>
+      <td>1,173.32</td>
+      <td>13.04</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Parag Parikh Flexi Cap Growth Direct Plan</td>
+      <td>187,701.61</td>
+      <td>43,491.67</td>
+      <td>13,170.12</td>
+      <td>157,380.17</td>
+      <td>214,049.26</td>
+      <td>56,669.08</td>
+      <td>36.01</td>
+    </tr>
+    <tr>
+      <td>PROVIDENTFUND</td>
+      <td>PPF</td>
+      <td>25,500.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>25,500.00</td>
+      <td>28,995.00</td>
+      <td>3,495.00</td>
+      <td>13.71</td>
+    </tr>
+    <tr>
+      <td>RD</td>
+      <td>RD_24_25_int_7_35</td>
+      <td>200,000.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>200,000.00</td>
+      <td>204,659.00</td>
+      <td>4,659.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>Tata Digital India Growth Direct Plan</td>
+      <td>20,282.99</td>
+      <td>11,284.00</td>
+      <td>3,231.38</td>
+      <td>12,230.25</td>
+      <td>13,618.58</td>
+      <td>1,388.33</td>
+      <td>11.35</td>
+    </tr>
+    <tr>
+      <td>MUTUALFUND</td>
+      <td>UTI Nifty 50 Index Growth Direct Plan</td>
+      <td>238,188.09</td>
+      <td>94,743.99</td>
+      <td>16,869.67</td>
+      <td>160,436.24</td>
+      <td>185,121.42</td>
+      <td>24,685.18</td>
+      <td>15.39</td>
+    </tr>
+  </tbody>
+</table></div>
+</section>
+<section class="table-card">
+  <h2>Yearly Distribution</h2>
+  <div class="table-scroll"><h3></h3>
+<table class="dataframe table table-sm table-bordered">
+  <thead>
+    <tr style="text-align: left;">
+      <th>FISCAL_YEAR</th>
+      <th>INCOME</th>
+      <th>INV_BUY</th>
+      <th>INV_SELL</th>
+      <th>EXPENSE</th>
+      <th>BANK</th>
+      <th>TAX</th>
+      <th>INTEREST_IN</th>
+      <th>INTEREST_OUT</th>
+      <th>LOAN_AMOUNT</th>
+      <th>LOAN_REPAYMENT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2021-2022</td>
+      <td>384,850.00</td>
+      <td>96,461.00</td>
+      <td>0.00</td>
+      <td>242,153.00</td>
+      <td>46,836.00</td>
+      <td>0.00</td>
+      <td>1,187.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>914,891.00</td>
+      <td>251,177.80</td>
+      <td>20,543.99</td>
+      <td>686,895.19</td>
+      <td>-3,664.00</td>
+      <td>2,000.00</td>
+      <td>5,819.75</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>974,322.00</td>
+      <td>395,625.04</td>
+      <td>108,975.67</td>
+      <td>725,378.63</td>
+      <td>-43,172.00</td>
+      <td>42,028.00</td>
+      <td>41,363.42</td>
+      <td>0.00</td>
+      <td>35,673.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>1,424,069.00</td>
+      <td>465,810.20</td>
+      <td>54,273.28</td>
+      <td>934,050.08</td>
+      <td>0.00</td>
+      <td>112,704.00</td>
+      <td>30,498.00</td>
+      <td>0.00</td>
+      <td>33,708.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>2025-2026</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>79,349.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>79,349.00</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table></div>
+</section>
+
+</main>
+
+<script>
+// ==== Helpers ====
+const INR = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2});
+const formatInr = v => INR.format(+v||0);
+const palette=['#0f4c75','#3282b8','#27ae60','#e74a3b','#f39c12','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d'];
+
+/* For bar/line datasets (assign distinct border/background colors) */
+function ensureColors(ds){
+  (ds||[]).forEach((d,i)=>{
+    const c = palette[i % palette.length];
+    d.borderColor = d.borderColor || c;             // ensure lines get distinct colors
+    if(d.type !== 'line'){                           // bars etc.
+      d.backgroundColor = d.backgroundColor || c;
+    }
+    d.borderWidth = d.borderWidth ?? 2;
+  });
+  return ds;
+}
+
+/* For pie/doughnut charts: assign per-slice colors */
+function colorizePie(data){
+  if(!data || !data.datasets || !data.datasets.length) return data;
+  const n = (data.labels || []).length;
+  const ds = data.datasets[0];
+  if(!Array.isArray(ds.backgroundColor) || ds.backgroundColor.length !== n){
+    ds.backgroundColor = Array.from({length:n}, (_,i)=>palette[i % palette.length]);
+    ds.borderColor = ds.borderColor || ds.backgroundColor;
+    ds.borderWidth = ds.borderWidth ?? 1;
+  }
+  return data;
+}
+
+// ==== Data from backend ====
+const expensePieData      = {"labels": ["HOME", "PERSONAL", "TRIP"], "datasets": [{"data": [687712.98, 1411549.9196, 489214.0]}]};
+const expenseFYData       = {"labels": ["2021-2022", "2022-2023", "2023-2024", "2024-2025"], "datasets": [{"label": "HOME", "data": [115074.98, 128215.0, 213521.0, 230902.0]}, {"label": "PERSONAL", "data": [112078.0196, 436680.1904, 360134.63, 502657.0796]}, {"label": "TRIP", "data": [15000.0, 122000.0, 151723.0, 200491.0]}]};
+const investPieData       = {"labels": ["MUTUALFUND", "PROVIDENTFUND", "RD", "BANK", "BONDS", "LIC"], "datasets": [{"label": "value", "data": [578854.62, 388050.0, 204659.0, 61506.0, 30000.0, 28545.0]}]};
+const portfolioPieData    = {"labels": ["MUTUALFUND", "RD", "BANK", "BONDS"], "datasets": [{"label": "Value", "data": [578854.62, 204659.0, 61506.0, 30000.0]}]};
+const retirementPieData   = {"labels": ["PROVIDENTFUND", "LIC"], "datasets": [{"label": "Value", "data": [388050.0, 28545.0]}]};
+const monthlyTrendData    = {"labels": ["2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-08"], "datasets": [{"label": "Expense", "data": [0.1683, 0.1683, 2902.1683, 45071.6683, 39198.168300000005, 12831.1683, 51116.168300000005, 15551.168300000001, 26606.168299999998, 11011.6683, 13412.148299999999, 24452.1683, 23080.8492, 35051.8492, 50865.8492, 78006.8492, 82473.8492, 128730.8492, 49047.8492, 31888.8492, 65308.8492, 46015.8492, 49441.8492, 46981.8492, 55588.552500000005, 62472.552500000005, 50538.552500000005, 36348.552500000005, 74887.5525, 44566.552500000005, 58142.552500000005, 72263.5525, 63289.552500000005, 142324.5525, 26292.5525, 38663.552500000005, 92527.4233, 54569.423299999995, 43079.423299999995, 61062.423299999995, 41233.423299999995, 103557.4233, 121478.4233, 73436.4233, 81057.4233, 44542.423299999995, 40513.423299999995, 176992.4233, 0.0, 0.0]}, {"label": "BUY", "data": [0.0, 0.0, 4064.0, 3600.0, 3600.0, 12599.55, 3600.0, 12599.55, 12599.55, 17599.3, 12599.55, 13599.5, 13599.5, 13599.5, 8199.8, 15999.699999999999, 24999.25, 24999.25, 24999.25, 10000.0, 30783.25, 34998.75, 38999.55, 10000.0, 21999.4, 24999.25, 30783.25, 24999.25, 15999.7, 24999.25, 24999.25, 24999.25, 30658.25, 29999.25, 15999.7, 125189.23999999999, 12999.85, 60658.25, 24999.25, 24999.25, 49999.25, 25000.0, 36999.4, 40599.4, 43599.25, 49258.25, 46599.1, 50098.95, 0.0, 0.0]}, {"label": "SELL", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 20543.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 108975.67, 34273.28, 0.0, 0.0, 20000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}, {"label": "Income", "data": [0.0, 0.0, 61034.0, 59916.0, 31916.0, 31916.0, 31916.0, 40478.0, 31916.0, 31916.0, 31916.0, 31926.0, 31916.0, 48060.0, 176115.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73200.0, 73196.0, 113861.0, 81329.0, 81309.0, 81329.0, 91089.0, 86209.0, 86209.0, 86209.0, 86209.0, 86209.0, 83286.0, 136945.0, 141667.0, 143467.0, 143467.0, 143467.0, 143467.0, 143467.0, 0.0, 0.0]}, {"label": "Loan", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35673.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 33708.0, 79349.0, 0.0]}, {"label": "Bank", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 61506.0]}]};
+
+// ==== Charts ====
+// Expense Pie (multicolor slices)
+new Chart(document.getElementById('expensePie'),{
+  type:'pie',
+  data: colorizePie(expensePieData),
+  options:{
+    plugins:{ legend:{position:'bottom'},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${formatInr(ctx.parsed)}`}}
+    },
+    responsive:true, maintainAspectRatio:false
+  }
+});
+
+// Expense Fiscal (stacked bar with colored datasets)
+expenseFYData.datasets = ensureColors(expenseFYData.datasets);
+new Chart(document.getElementById('expenseFY'),{
+  type:'bar',
+  data: expenseFYData,
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom'}},
+    scales:{
+      x:{stacked:true},
+      y:{stacked:true, ticks:{callback:v=>formatInr(v)}, grid:{color:'rgba(0,0,0,0.06)'}}
+    }
+  }
+});
+
+// Investment pies (multicolor slices)
+new Chart(document.getElementById('investPie'),{
+  type:'pie',
+  data: colorizePie(investPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+new Chart(document.getElementById('portfolioPie'),{
+  type:'pie',
+  data: colorizePie(portfolioPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+new Chart(document.getElementById('retirementPie'),{
+  type:'pie',
+  data: colorizePie(retirementPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+
+// Monthly Trends (colored lines)
+monthlyTrendData.datasets = ensureColors(monthlyTrendData.datasets).map(d=>({
+  ...d, type:'line', tension:.3, fill:false, pointRadius:3
+}));
+new Chart(document.getElementById('monthlyTrends'),{
+  type:'line',
+  data: monthlyTrendData,
+  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}
+});
+</script>
+</body>
+</html>

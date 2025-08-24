@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Expense Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --ink:#1f2d3d; --muted:#6b7b8c; --brand:#0f4c75; --brand-2:#3282b8; --ring: rgba(15,76,117,0.12);
+  --radius:16px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;padding:28px 28px 24px;box-shadow:var(--shadow)}
+header h1{margin:0;font-weight:700;font-size:28px}
+header p{margin:8px 0 0;opacity:.9;font-size:13px}
+.wrap{padding:22px;max-width:1200px;margin:0 auto}
+
+/* Summary cards */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:22px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;overflow:hidden}
+.card .icon{font-size:22px;margin-bottom:8px}
+.card h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.card p{margin:0;font-weight:700;font-size:22px;color:var(--brand)}
+
+/* Insights */
+.insights{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:22px}
+.insights h3{margin:0 0 8px;font-size:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#eef5fb;color:#0b3c5d;font-weight:600;font-size:12px}
+
+/* Charts */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+@media(max-width:900px){.row{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.chart-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.chart-wrap{position:relative;width:100%;height:340px}
+
+.full-chart{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:22px}
+.full-chart h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.full-chart .chart-wrap{height:320px}
+
+/* Table */
+.table-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:26px}
+.table-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.table-scroll{overflow:auto;border:1px solid #e6ebf1;border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{padding:10px 12px;border-bottom:1px solid #ecf0f3}
+th{background:#0f4c75;color:#fff;position:sticky;top:0;text-align:left}
+tr:nth-child(even){background:#fafcfe}
+tr:hover{background:#eef5fb}
+.category-badge{display:inline-block;padding:4px 10px;border-radius:999px;color:#fff;font-weight:700;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>Expense Report</h1>
+<p>Generated on: 2025-08-24 17:16</p>
+</header>
+<main class="wrap">
+
+<!-- Summary -->
+<section class="summary">
+
+<div class="card">
+  <div class="icon">💰</div>
+  <h3>Total Expenses</h3>
+  <p>₹2,588,476.90</p>
+</div>
+
+<div class="card">
+  <div class="icon">📅</div>
+  <h3>Average Monthly Expense</h3>
+  <p>₹53,926.60</p>
+</div>
+
+<div class="card">
+  <div class="icon">📅</div>
+  <h3>Highest Expense Month</h3>
+  <p>March 2025</p>
+</div>
+
+<div class="card">
+  <div class="icon">📅</div>
+  <h3>Lowest Expense Month</h3>
+  <p>April 2021</p>
+</div>
+
+</section>
+
+<!-- Insights -->
+
+<section class="insights">
+  <h3>INSIGHTS</h3>
+  <p>
+    Highest Category: <span class="pill">General</span>. 
+    Highest Type: <span class="pill">PERSONAL</span>. 
+    AVG Monthly Expense: <span class="pill">₹53,926.60</span>. 
+    YOY Expense: <span class="pill">28.77%</span>. 
+  </p>
+</section>
+
+
+
+<!-- Charts -->
+<section class="row">
+<div class="chart-card">
+<h2>Expense Breakdown by Type</h2>
+<div class="chart-wrap"><canvas id="pieType"></canvas></div>
+</div>
+<div class="chart-card">
+<h2>Fiscal Year Breakdown by Type</h2>
+<div class="chart-wrap"><canvas id="stackedFY"></canvas></div>
+</div>
+</section>
+
+<section class="full-chart">
+<h2>Monthly Expense Trend</h2>
+<div class="chart-wrap"><canvas id="monthlyTrend"></canvas></div>
+</section>
+
+<!-- Table -->
+<section class="table-card">
+<h2>Expense Table</h2>
+<div class="table-scroll"><h3></h3>
+<table class="dataframe table table-sm table-bordered">
+  <thead>
+    <tr style="text-align: left;">
+      <th>FISCAL_YEAR</th>
+      <th>TYPE</th>
+      <th>COST</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2021-2022</td>
+      <td>HOME</td>
+      <td>115,074.98</td>
+    </tr>
+    <tr>
+      <td>2021-2022</td>
+      <td>PERSONAL</td>
+      <td>112,078.02</td>
+    </tr>
+    <tr>
+      <td>2021-2022</td>
+      <td>TRIP</td>
+      <td>15,000.00</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>PERSONAL</td>
+      <td>436,680.19</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>HOME</td>
+      <td>128,215.00</td>
+    </tr>
+    <tr>
+      <td>2022-2023</td>
+      <td>TRIP</td>
+      <td>122,000.00</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>PERSONAL</td>
+      <td>360,134.63</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>HOME</td>
+      <td>213,521.00</td>
+    </tr>
+    <tr>
+      <td>2023-2024</td>
+      <td>TRIP</td>
+      <td>151,723.00</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>PERSONAL</td>
+      <td>502,657.08</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>HOME</td>
+      <td>230,902.00</td>
+    </tr>
+    <tr>
+      <td>2024-2025</td>
+      <td>TRIP</td>
+      <td>200,491.00</td>
+    </tr>
+  </tbody>
+</table></div>
+</section>
+</main>
+
+<script>
+// ==== Helpers ====
+const INR = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2});
+const formatInr = v => INR.format(+v||0);
+const palette=['#0f4c75','#3282b8','#27ae60','#e74a3b','#f39c12','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d'];
+
+function ensureColors(ds){
+  (ds||[]).forEach((d,i)=>{d.backgroundColor=d.backgroundColor||palette[i%palette.length]; if(d.type!=='line') d.borderColor=d.borderColor||d.backgroundColor; d.borderWidth=d.borderWidth??1;});
+  return ds;
+}
+
+// Data
+const pieData={"labels": ["HOME", "PERSONAL", "TRIP"], "datasets": [{"data": [687712.98, 1411549.9196, 489214.0]}]};
+const stackedData={"labels": ["2021-2022", "2022-2023", "2023-2024", "2024-2025"], "datasets": [{"label": "HOME", "data": [115074.98, 128215.0, 213521.0, 230902.0]}, {"label": "PERSONAL", "data": [112078.0196, 436680.1904, 360134.63, 502657.0796]}, {"label": "TRIP", "data": [15000.0, 122000.0, 151723.0, 200491.0]}]};
+const monthlyData={"labels": ["2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03"], "datasets": [{"label": "Expense", "data": [0.17, 0.17, 2902.17, 45071.67, 39198.17, 12831.17, 51116.17, 15551.17, 26606.17, 11011.67, 13412.15, 24452.17, 23080.85, 35051.85, 50865.85, 78006.85, 82473.85, 128730.85, 49047.85, 31888.85, 65308.85, 46015.85, 49441.85, 46981.85, 55588.55, 62472.55, 50538.55, 36348.55, 74887.55, 44566.55, 58142.55, 72263.55, 63289.55, 142324.55, 26292.55, 38663.55, 92527.42, 54569.42, 43079.42, 61062.42, 41233.42, 103557.42, 121478.42, 73436.42, 81057.42, 44542.42, 40513.42, 176992.42]}]};
+
+// Charts
+new Chart(document.getElementById('pieType'), {type:'pie',data:pieData,options:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${formatInr(ctx.parsed)}`}}},responsive:true,maintainAspectRatio:false}});
+stackedData.datasets=ensureColors(stackedData.datasets).map(d=>({...d,stack:'types'}));
+new Chart(document.getElementById('stackedFY'),{type:'bar',data:stackedData,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>formatInr(v)},grid:{color:'rgba(0,0,0,0.06)'}}}}});
+monthlyData.datasets=ensureColors(monthlyData.datasets).map(d=>({...d,tension:.3,fill:false,pointRadius:3}));
+new Chart(document.getElementById('monthlyTrend'),{type:'line',data:monthlyData,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+</script>
+</body>
+</html>

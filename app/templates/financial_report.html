@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Financial Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --ink:#1f2d3d; --muted:#6b7b8c; --brand:#0f4c75; --brand-2:#3282b8; --ring: rgba(15,76,117,0.12);
+  --radius:16px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;padding:28px 28px 24px;box-shadow:var(--shadow)}
+header h1{margin:0;font-weight:700;font-size:28px}
+header p{margin:8px 0 0;opacity:.9;font-size:13px}
+.wrap{padding:22px;max-width:1200px;margin:0 auto}
+
+/* Summary cards */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:22px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;overflow:hidden}
+.card .icon{font-size:22px;margin-bottom:8px}
+.card h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.card p{margin:0;font-weight:700;font-size:22px;color:var(--brand)}
+
+/* Insights */
+.insights{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:22px}
+.insights h3{margin:0 0 8px;font-size:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#eef5fb;color:#0b3c5d;font-weight:600;font-size:12px}
+
+/* Charts */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.row-3cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:900px){.row,.row-3cols{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.chart-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.chart-wrap{position:relative;width:100%;height:340px}
+
+.full-chart{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:22px}
+.full-chart h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.full-chart .chart-wrap{height:320px}
+
+/* Table */
+.table-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:26px}
+.table-card h2{margin:0 0 10px;font-size:15px;font-weight:700;color:var(--brand)}
+.table-scroll{overflow:auto;border:1px solid #e6ebf1;border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{padding:10px 12px;border-bottom:1px solid #ecf0f3}
+th{background:#0f4c75;color:#fff;position:sticky;top:0;text-align:left}
+tr:nth-child(even){background:#fafcfe}
+tr:hover{background:#eef5fb}
+.category-badge{display:inline-block;padding:4px 10px;border-radius:999px;color:#fff;font-weight:700;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>Financial Report</h1>
+<p>Generated on: {{ generated_on }}</p>
+</header>
+<main class="wrap">
+
+<!-- Summary -->
+<section class="summary">
+{% for item in summary_cards %}
+<div class="card">
+  <div class="icon">{% if item.label.lower().startswith('total') %}💰{% elif 'loan' in item.label.lower() %}🏦{% elif 'bank' in item.label.lower() %}🏛️{% else %}🧾{% endif %}</div>
+  <h3>{{ item.label }}</h3>
+  <p>{{ item.value }}</p>
+</div>
+{% endfor %}
+</section>
+
+<!-- Insights -->
+<section class="insights">
+<h3>Insights</h3>
+<p>
+{% if insights.PORTFOLIO_RETURN != 'N/A' %}Portfolio Return: <span class="pill">{{ insights.PORTFOLIO_RETURN }}%</span>. {% endif %}
+{% if insights.RETIREMENT_RETURN != 'N/A' %}Retirement Return: <span class="pill">{{ insights.RETIREMENT_RETURN }}%</span>. {% endif %}
+{% if insights.AVG_MONTHLY_EXPENSE != 'N/A' %}Avg Monthly Expense: <span class="pill">{{ insights.AVG_MONTHLY_EXPENSE }}</span>. {% endif %}
+{% if insights.YOY_EXPENSE != 'N/A' %}YoY Expense: <span class="pill">{{ insights.YOY_EXPENSE }}%</span>. {% endif %}
+{% if insights.YOY_INVEST != 'N/A' %}YoY Invest: <span class="pill">{{ insights.YOY_INVEST }}%</span>. {% endif %}
+{% if insights.CONCENTRATION_RISK != 'N/A' %}Concentration Risk: <span class="pill">{{ insights.CONCENTRATION_RISK }}</span>. {% endif %}
+{% if insights.TOP_ASSET != 'N/A' %}Top Asset: <span class="pill">{{ insights.TOP_ASSET }}</span>. {% endif %}
+{% if insights.LARGEST_HOLDING != 'N/A' %}Largest Holding: <span class="pill">{{ insights.LARGEST_HOLDING }}</span>. {% endif %}
+</p>
+</section>
+
+<!-- Row 1: Expense Charts -->
+<section class="row">
+  <div class="chart-card">
+    <h2>Expense Breakdown by Type</h2>
+    <div class="chart-wrap"><canvas id="expensePie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Fiscal Year Expense Breakdown</h2>
+    <div class="chart-wrap"><canvas id="expenseFY"></canvas></div>
+  </div>
+</section>
+
+<!-- Row 2: Investment Pie Charts -->
+<section class="row-3cols">
+  <div class="chart-card">
+    <h2>Investments</h2>
+    <div class="chart-wrap"><canvas id="investPie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Portfolio</h2>
+    <div class="chart-wrap"><canvas id="portfolioPie"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h2>Retirement</h2>
+    <div class="chart-wrap"><canvas id="retirementPie"></canvas></div>
+  </div>
+</section>
+
+<!-- Row 3: Monthly Trends -->
+<section class="full-chart">
+  <h2>Monthly Trends</h2>
+  <div class="chart-wrap"><canvas id="monthlyTrends"></canvas></div>
+</section>
+
+<!-- Tables -->
+<section class="table-card">
+  <h2>Expense Table</h2>
+  <div class="table-scroll">{{ expense_table | safe }}</div>
+</section>
+<section class="table-card">
+  <h2>Savings Table</h2>
+  <div class="table-scroll">{{ savings_table | safe }}</div>
+</section>
+<section class="table-card">
+  <h2>Yearly Distribution</h2>
+  <div class="table-scroll">{{ yearly_table | safe }}</div>
+</section>
+
+</main>
+
+<script>
+// ==== Helpers ====
+const INR = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2});
+const formatInr = v => INR.format(+v||0);
+const palette=['#0f4c75','#3282b8','#27ae60','#e74a3b','#f39c12','#8e44ad','#16a085','#2c3e50','#d35400','#7f8c8d'];
+
+/* For bar/line datasets (assign distinct border/background colors) */
+function ensureColors(ds){
+  (ds||[]).forEach((d,i)=>{
+    const c = palette[i % palette.length];
+    d.borderColor = d.borderColor || c;             // ensure lines get distinct colors
+    if(d.type !== 'line'){                           // bars etc.
+      d.backgroundColor = d.backgroundColor || c;
+    }
+    d.borderWidth = d.borderWidth ?? 2;
+  });
+  return ds;
+}
+
+/* For pie/doughnut charts: assign per-slice colors */
+function colorizePie(data){
+  if(!data || !data.datasets || !data.datasets.length) return data;
+  const n = (data.labels || []).length;
+  const ds = data.datasets[0];
+  if(!Array.isArray(ds.backgroundColor) || ds.backgroundColor.length !== n){
+    ds.backgroundColor = Array.from({length:n}, (_,i)=>palette[i % palette.length]);
+    ds.borderColor = ds.borderColor || ds.backgroundColor;
+    ds.borderWidth = ds.borderWidth ?? 1;
+  }
+  return data;
+}
+
+// ==== Data from backend ====
+const expensePieData      = {{ expense_pie_data | safe }};
+const expenseFYData       = {{ expense_fy_data | safe }};
+const investPieData       = {{ invest_pie_data | safe }};
+const portfolioPieData    = {{ portfolio_pie_data | safe }};
+const retirementPieData   = {{ retirement_pie_data | safe }};
+const monthlyTrendData    = {{ monthly_trend_data | safe }};
+
+// ==== Charts ====
+// Expense Pie (multicolor slices)
+new Chart(document.getElementById('expensePie'),{
+  type:'pie',
+  data: colorizePie(expensePieData),
+  options:{
+    plugins:{ legend:{position:'bottom'},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${formatInr(ctx.parsed)}`}}
+    },
+    responsive:true, maintainAspectRatio:false
+  }
+});
+
+// Expense Fiscal (stacked bar with colored datasets)
+expenseFYData.datasets = ensureColors(expenseFYData.datasets);
+new Chart(document.getElementById('expenseFY'),{
+  type:'bar',
+  data: expenseFYData,
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom'}},
+    scales:{
+      x:{stacked:true},
+      y:{stacked:true, ticks:{callback:v=>formatInr(v)}, grid:{color:'rgba(0,0,0,0.06)'}}
+    }
+  }
+});
+
+// Investment pies (multicolor slices)
+new Chart(document.getElementById('investPie'),{
+  type:'pie',
+  data: colorizePie(investPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+new Chart(document.getElementById('portfolioPie'),{
+  type:'pie',
+  data: colorizePie(portfolioPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+new Chart(document.getElementById('retirementPie'),{
+  type:'pie',
+  data: colorizePie(retirementPieData),
+  options:{plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false}
+});
+
+// Monthly Trends (colored lines)
+monthlyTrendData.datasets = ensureColors(monthlyTrendData.datasets).map(d=>({
+  ...d, type:'line', tension:.3, fill:false, pointRadius:3
+}));
+new Chart(document.getElementById('monthlyTrends'),{
+  type:'line',
+  data: monthlyTrendData,
+  options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}
+});
+</script>
+</body>
+</html>
