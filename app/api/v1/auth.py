@@ -80,6 +80,14 @@ def login(user: UserCreate, db: Session = Depends(get_db)):
     access_token = create_access_token({"sub": db_user.username})
     return Token(access_token=access_token)
 
+# Add user profile endpoint in auth.py
+@router.get("/profile")
+def get_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username
+    }
+
 # Optional: health check
 @router.get("/health")
 def health_check():

@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()  # This loads the .env file values into environment variables
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -17,7 +21,7 @@ app = FastAPI(title="Wealth Tracker API")
 # CORS if needed
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

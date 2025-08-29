@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from typing import Optional
+from datetime import date
 from sqlalchemy.orm import Session
 from app.db.models import Expense
 from app.schemas.expense import ExpenseCreate, ExpenseOut
@@ -19,9 +21,13 @@ def create_expense(
 
 @router.get("/", response_model=list[ExpenseOut])
 def get_expenses(
-    year: str = None,
-    month: str = None,
-    financial_year: str = None,
+    skip: int = 0,
+    limit: int = 25,
+    start_date: Optional[date] = Query(None),
+    end_date: Optional[date] = Query(None),
+    year: Optional[str] = None,
+    month: Optional[str] = None,
+    financial_year: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -33,5 +39,18 @@ def get_expenses(
         query = query.filter(Expense.month == month)
     if financial_year:
         query = query.filter(Expense.financial_year == financial_year)
+    if start_date:
+        query = query.filter(
+            (Expense.year + "-" + Expense.month + "-" + Expense.day) >= start_date.isoformat()
+        )
+    if end_date:
+        query = query.filter(
+            (Expense.year + "-" + Expense.month + "-" + Expense.day) <= end_date.isoformat()
+        )
 
-    return query.all()
+    total = query.count()
+    items = query.order_by(Expense.year.desc(), Expense.month.desc(), Expense.day.desc()) \
+                 .offset(skip).limit(limit).all()
+    return items
+
+
