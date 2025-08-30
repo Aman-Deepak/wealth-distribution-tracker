@@ -1,3 +1,8 @@
 .env
-/generated-reports
-/uploaded_files
+# Ignore contents of uploaded_files but keep folder
+uploaded_files/*
+!uploaded_files/.gitkeep
+
+# Ignore contents of generated_reports but keep folder
+generated_reports/*
+!generated_reports/.gitkeep
