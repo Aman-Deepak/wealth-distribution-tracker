@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.models import Loan
-from app.schemas.income import LoanCreate, LoanOut
+from app.schemas.loan import LoanCreate, LoanOut
 from app.api.v1.auth import get_current_user, get_db
 from app.db.models import User
 from app.services.loan import create_loan
 router = APIRouter(prefix="/loan", tags=["Loan"])
 
 @router.post("/", response_model=LoanOut)
-def create_loan(
+def create_loans(
     data: LoanCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)

@@ -153,7 +153,7 @@ def get_yearly_closing_balance(user_id: int, db: Session, financial_year: str = 
         else:
             return balance
     balance = query.order_by(YearlyClosingBankBalance.financial_year.desc()).first()
-    print(f"Yearly Closing Bank Balance: {balance}")
+    print(f"Yearly Closing Bank Balance: {balance.closing_balance}")
     return balance
 
 

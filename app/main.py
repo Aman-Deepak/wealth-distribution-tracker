@@ -11,6 +11,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.income import router as income_router
 from app.api.v1.expense import router as expense_router
 from app.api.v1.invest import router as invest_router
+from app.api.v1.loan import router as loan_router
 from app.api.v1.upload import router as upload_router
 from app.api.v1.summary import router as summary_router
 from app.api.v1.report import router as report_router
@@ -32,6 +33,7 @@ app.include_router(auth_router)
 app.include_router(income_router)
 app.include_router(expense_router)
 app.include_router(invest_router)
+app.include_router(loan_router)
 app.include_router(upload_router)
 app.include_router(summary_router)
 app.include_router(report_router)
