@@ -19,7 +19,7 @@ os.makedirs(GENERATED_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 RETIREMENT_SET = {"PF", "PROVIDENTFUND", "LIC"}
-PORTFOLIO_TYPES = {"MUTUALFUND", "BONDS", "RD", "BANK"}
+PORTFOLIO_TYPES = {"MUTUALFUND", "BONDS", "RD", "BANK", "FD", "STOCK"}
 SUPPORTED_EXTENSIONS = {'.xlsx', '.xls', '.csv'}
 ALLOWED_FILENAMES = {
     "expenses": {"expenses.xlsx"},
@@ -88,13 +88,13 @@ def get_navs(db: Session):
     print('Get funds Details')
     return db.query(NAV).all()
 
-def add_nav(nav_data: dict, db: Session):
-    print('Add new funds NAV')
+def add_navs(nav_data: dict, db: Session):
+    print(f'Add new funds NAV: {nav_data}')
     nav_entry = NAV(
-        type=nav_data["type"].upper(),
-        fund_name=nav_data["fund_name"],
-        unique_identifier=nav_data["unique_identifier"],
-        nav=Decimal(nav_data.get("nav", 0)),
+        type=nav_data["TYPE"].upper(),
+        fund_name=nav_data["FUND_NAME"],
+        unique_identifier=nav_data["UNIQUE_IDENTIFIER"],
+        nav=Decimal(nav_data.get("NAV", 0)),
         last_updated=datetime.now()
     )
     db.add(nav_entry)
@@ -142,17 +142,22 @@ def update_navs(db: Session):
 
 
 # ------------------- Yearly Closing Bank Balance -------------------
+def get_all_yearly_closing_balance(user_id: int, db: Session):
+    print(f'fetch all Yearly Closing Balance for user {user_id}')
+    query = db.query(YearlyClosingBankBalance).filter_by(user_id=user_id)
+    return query
 
 def get_yearly_closing_balance(user_id: int, db: Session, financial_year: str = None):
     print(f'fetch Yearly Closing Balance for user {user_id} for financial year {financial_year}')
     query = db.query(YearlyClosingBankBalance).filter_by(user_id=user_id)
     if financial_year:
         balance = query.filter_by(financial_year=financial_year).first()
-        if not balance:
-            raise ValueError(f"No data found for '{financial_year}'.")
-        else:
-            return balance
-    balance = query.order_by(YearlyClosingBankBalance.financial_year.desc()).first()
+    else:
+        balance = query.order_by(YearlyClosingBankBalance.financial_year.desc()).first()
+    if not balance:
+        print(f"No Data found for fiscal year: {financial_year}")
+        raise ValueError(f"No data found for '{financial_year}'.")
+    
     print(f"Yearly Closing Bank Balance: {balance.closing_balance}")
     return balance
 

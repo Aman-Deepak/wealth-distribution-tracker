@@ -42,3 +42,32 @@ def get_table_data(
 
     except Exception as e:
         raise HTTPException(500, str(e))
+
+
+
+@router.post("/data/raw")
+def get_table_data(
+    req: TableRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    user_id = current_user.id
+    # Fetch dataframes
+    exp_df = fetch_expense_data(user_id=user_id, db=db)
+    sav_df = fetch_savings_data(user_id=user_id, db=db)
+    yearly_df = fetch_yearly_distribution_data(user_id=user_id, db=db)
+
+    try:
+        if req.table_name == "expense_summary":
+            return generate_expense_table(exp_df, False)
+
+        if req.table_name == "savings_summary":
+            return generate_savings_table(sav_df, False)
+
+        if req.table_name == "yearly_distribution":
+            return generate_yearly_distribution_table(yearly_df, False)
+
+        raise HTTPException(404, f"Unknown table_name: {req.table_name}")
+
+    except Exception as e:
+        raise HTTPException(500, str(e))

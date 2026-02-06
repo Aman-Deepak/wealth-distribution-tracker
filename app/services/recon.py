@@ -12,33 +12,36 @@ from app.services.summary import update_monthly_distributions
 
 def expense_adjustment_positive(db: Session, user_id: int, fiscal_year: str, amount: float, input_date: date = None):
     current_fy = get_current_financial_year()
-    today = get_today_datetime
+    today = get_today_datetime()
+    try:
 
-    if input_date:
-        # only that month
-        fy = fiscal_year
-        year, month = str(input_date.year), f"{input_date.month:02d}"
-        per_amount = amount
-        upsert_expense(db, user_id, fy, year, month, per_amount)
-    else:
-        if fiscal_year != current_fy:
-            print(f"fiscal_year != current_fy spread across 12 months")
-            per_amount = amount / 12
-            for m in range(1, 13):
-                year = fiscal_year.split("-")[0] if m >= 4 else fiscal_year.split("-")[1]
-                upsert_expense(db, user_id, fiscal_year, str(year), f"{m:02d}", per_amount)
+        if input_date:
+            # only that month
+            fy = fiscal_year
+            year, month = str(input_date.year), f"{input_date.month:02d}"
+            per_amount = amount
+            upsert_expense(db, user_id, fy, year, month, per_amount)
         else:
-            print(f"fiscal_year == current_fy spread till current month")
-            months = today.month - 3 if today.month >= 4 else today.month + 9
-            per_amount = amount / months
-            for m in range(4, today.month + 1 if today.month >= 4 else today.month+13):
-                year_start = today.year if today.month >= 4 else today.year - 1
-                year_end = year_start + 1
-                year = str(year_start if m <= 12 else year_end)
-                month = f"{m:02d}" if m <= 12 else f"{m-12:02d}"
-                upsert_expense(db, user_id, fiscal_year, year, month, per_amount)
+            if fiscal_year != current_fy:
+                print(f"fiscal_year != current_fy spread across 12 months")
+                per_amount = amount / 12
+                for m in range(1, 13):
+                    year = fiscal_year.split("-")[0] if m >= 4 else fiscal_year.split("-")[1]
+                    upsert_expense(db, user_id, fiscal_year, str(year), f"{m:02d}", per_amount)
+            else:
+                months = today.month - 3 if today.month >= 4 else today.month + 9
+                per_amount = amount / months
+                print(f"fiscal_year == current_fy spread till current month i.e in: {months} months")
+                for m in range(4, today.month + 1 if today.month >= 4 else today.month+13):
+                    year_start = today.year if today.month >= 4 else today.year - 1
+                    year_end = year_start + 1
+                    year = str(year_start if m <= 12 else year_end)
+                    month = f"{m:02d}" if m <= 12 else f"{m-12:02d}"
+                    upsert_expense(db, user_id, fiscal_year, year, month, per_amount)
 
-    db.commit()
+        db.commit()
+    except Exception as e:
+        print(f"Error while positive expense adjustment: {e}")
 
 
 
@@ -231,6 +234,7 @@ def reconcile_bank(user_id: int, db: Session, input_date: date = None, fiscal_ye
     1. Compare configs.bank_balance with calculated monthly_distribution bank sum
     2. Insert/update ADJUSTED expenses accordingly
     """
+    print(f"Recalculating bank balance:: user: {user_id}, fiscal_year: {fiscal_year}")
     # ---- Step 1: Fetch current bank balance ----
     if input_date:
         fiscal_year = compute_financial_year(input_date.year, input_date.month) 

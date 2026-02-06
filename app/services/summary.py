@@ -294,7 +294,7 @@ def update_savings(user_id: int, db: Session):
     
     #Process Bank
     print("➡ Processing Bank / HDFC")
-    intr = interest_map[("Bank", "HDFC")]
+    intr = interest_map[("BANK", "HDFC")]
     bank_balance =  get_yearly_closing_balance(user_id, db).closing_balance
     interest_in = intr["in"]
     interest_out = intr["out"]
@@ -430,48 +430,41 @@ def calc_fd(name, txns, interest_in: Decimal, interest_out: Decimal):
     - For ongoing FDs: current_invested from principal, current_value = principal + accrued interest
     - No remaining_units because FDs don't have units
     """
-    t_buy = Decimal(0)   # Total principal invested
-    t_sell = Decimal(0)  # Total maturity amount withdrawn
-    current_invested = Decimal(0)
-    current_value = Decimal(0)
+    try:
+        t_buy = Decimal(0)   # Total principal invested
+        t_sell = Decimal(0)  
+        current_invested = Decimal(0)
+        current_value = Decimal(0)
+        profit_booked = Decimal(interest_in or 0) - Decimal(interest_out or 0)
 
-    # Identify closed vs ongoing
-    on_going = True
-    for txn in txns:
-        cost = Decimal(str(txn.cost or 0))
-        if txn.type_of_order.upper() == "BUY":
-            t_buy += cost
-        elif txn.type_of_order.upper() == "SELL":
-            t_sell += cost
-            on_going = False
+        # Identify closed vs ongoing
+        on_going = True
+        for txn in txns:
+            cost = Decimal(str(txn.cost or 0))
+            if txn.type_of_order.upper() == "BUY":
+                t_buy += cost
+            elif txn.type_of_order.upper() == "SELL":
+                t_sell += cost
+                on_going = False
 
-    if on_going:
-        parts = name.split("_")
-        if len(parts) != 5:
-            raise ValueError(f"Invalid FD name format: {name}")
-        type_, principal_str, rate_str, start_str, maturity_str = parts
-        principal = Decimal(principal_str)
-        rate = Decimal(rate_str) / Decimal(100)  # % to decimal
-        start_date = datetime.strptime(start_str, "%Y-%m-%d").date()
-        today = datetime.today().date()
-        days_elapsed = (today - start_date).days
-        accrued_interest = (principal * rate * Decimal(days_elapsed) / Decimal(365)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        current_invested = t_buy
-        current_value = current_invested + accrued_interest
+        if on_going:
+            current_invested = t_buy
+            current_value = current_invested
+            
+        profit_loss = current_value - current_invested
 
-    profit_booked = Decimal(interest_in or 0) - Decimal(interest_out or 0)
-    profit_loss = current_value - current_invested
-
-    return {
-        "t_buy": round(t_buy, 2),
-        "t_sell": round(t_sell, 2),
-        "profit_booked": round(profit_booked, 2),
-        "current_invested": round(current_invested, 2),
-        "current_value": round(current_value, 2),
-        "profit_loss": round(profit_loss, 2),
-        "return_percentage": ((profit_loss / current_invested) * Decimal(100))
-                             if current_invested != 0 else Decimal(0)
-    }
+        return {
+            "t_buy": round(t_buy, 2),
+            "t_sell": round(t_sell, 2),
+            "profit_booked": round(profit_booked, 2),
+            "current_invested": round(current_invested, 2),
+            "current_value": round(current_value, 2),
+            "profit_loss": round(profit_loss, 2),
+            "return_percentage": ((profit_loss / current_invested) * Decimal(100))
+                                if current_invested != 0 else Decimal(0)
+        }
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 def calc_pf(name, txns, interest_in: Decimal, interest_out: Decimal):
@@ -531,32 +524,36 @@ def calc_rd_lic(name, txns, interest_in: Decimal, interest_out: Decimal):
     current_invested = Decimal(0)
     current_value = Decimal(0)
     profit_booked = Decimal(interest_in or 0) - Decimal(interest_out or 0)
+    profit_loss = Decimal(0)
     on_going = True
 
-    for txn in txns:
-        cost = Decimal(str(txn.cost or 0))
-        if txn.type_of_order.upper() == "BUY":
-            t_buy += cost
-        elif txn.type_of_order.upper() == "SELL":
-            t_sell += cost
-            on_going = False
+    try:
+        for txn in txns:
+            cost = Decimal(str(txn.cost or 0))
+            if txn.type_of_order.upper() == "BUY":
+                t_buy += cost
+            elif txn.type_of_order.upper() == "SELL":
+                t_sell += cost
+                on_going = False
 
-    if on_going:
-        current_invested = t_buy
-        profit_booked = Decimal(0)
-        current_value = current_invested + Decimal(interest_in or 0) - Decimal(interest_out or 0)
-        profit_loss = current_value - current_invested
+        if on_going:
+            current_invested = t_buy
+            profit_booked = Decimal(0)
+            current_value = current_invested + Decimal(interest_in or 0) - Decimal(interest_out or 0)
+            profit_loss = current_value - current_invested
 
-    return {
-        "t_buy": round(t_buy, 2),
-        "t_sell": round(t_sell, 2),
-        "profit_booked": round(profit_booked, 2),
-        "current_invested": round(current_invested, 2),
-        "current_value": round(current_value, 2),
-        "profit_loss": round(profit_loss, 2),
-        "return_percentage": Decimal(0) if current_invested == 0 else
-            round((profit_booked / t_buy) * Decimal(100), 2)
-    }
+        return {
+            "t_buy": round(t_buy, 2),
+            "t_sell": round(t_sell, 2),
+            "profit_booked": round(profit_booked, 2),
+            "current_invested": round(current_invested, 2),
+            "current_value": round(current_value, 2),
+            "profit_loss": round(profit_loss, 2),
+            "return_percentage": Decimal(0) if current_invested == 0 else
+                round((profit_booked / t_buy) * Decimal(100), 2)
+        }
+    except Exception as e:
+        print(f"Issue in calculating RD/LIC: {e}")
 
 def calc_bonds(name, txns, interest_in: Decimal, interest_out: Decimal):
     """

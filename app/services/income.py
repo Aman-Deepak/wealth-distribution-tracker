@@ -162,3 +162,18 @@ def fetch_income_data(user_id: int, db: Session) -> pd.DataFrame:
     df.sort_values(by="DATE", inplace=True)
     print(f'Fetched {len(df)} records')
     return df
+
+def fetch_tax_data(user_id: int, db: Session) -> pd.DataFrame:
+    print(f'Fetching Tax of user {user_id}')
+    income = db.query(Income).filter(Income.user_id == user_id).all()
+    if not income:
+        print("No Tax data found")
+        return pd.DataFrame(columns=["DATE","AMOUNT"])
+    
+    df = pd.DataFrame([{
+        "DATE": datetime(int(i.year), int(i.month), int(i.day)),
+        "AMOUNT": float(to_decimal(i.tax))
+    } for i in income])
+    df.sort_values(by="DATE", inplace=True)
+    print(f'Fetched {len(df)} records')
+    return df

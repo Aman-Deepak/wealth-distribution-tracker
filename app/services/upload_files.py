@@ -13,7 +13,7 @@ from fastapi import UploadFile, File, HTTPException
 from app.services.config import *
 
 
-def upload_file(db: Session, user_id: int, file: UploadFile = File(...)):
+def upload_files(db: Session, user_id: int, file: UploadFile = File(...)):
     try:
         filename = file.filename
         file_ext = filename.split(".")[-1].lower()
@@ -88,11 +88,11 @@ def process_uploaded_file(filepath: str, file_type: str, user_id: int, db: Sessi
         raise Exception(f"Unknown file type: {file_type}")
 
     print("🔁 Updating summaries after data insert")
-    for fy in fy_list:
+    for fy in fy_list or []:
         update_monthly_distributions(user_id, db, fy)
         if file_type == "expenses":
             reconcile_bank(user_id, db, fiscal_year=fy)
-    for fy in fy_list:
+    for fy in fy_list or []:
         update_yearly_distributions(user_id, db, fy)
 
     update_savings(user_id, db)

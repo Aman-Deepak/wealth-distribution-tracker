@@ -64,7 +64,10 @@ def prepare_invest_monthly_trend(inv_df: pd.DataFrame) -> dict:
 
 def prepare_saving_pie_charts(s_df: pd.DataFrame) -> tuple[dict, dict, dict]:
     print("Preparing Saving PIE Chart")
+
     invest_breakdown = s_df.groupby(s_df["TYPE"].str.upper())["CURRENT_VALUE"].sum().sort_values(ascending=False)
+    print("Investment Types included:", invest_breakdown.index.tolist())
+    print("Values:", invest_breakdown.to_dict())
     pie_invest_data = {
         "labels": invest_breakdown.index.tolist(),
         "datasets": [{"label": "value", "data": [float(x) for x in invest_breakdown.values]}]
@@ -72,6 +75,8 @@ def prepare_saving_pie_charts(s_df: pd.DataFrame) -> tuple[dict, dict, dict]:
 
     port_df = s_df[s_df["TYPE"].str.upper().isin(PORTFOLIO_TYPES)]
     portfolio_breakdown = port_df.groupby(port_df["TYPE"].str.upper())["CURRENT_VALUE"].sum().sort_values(ascending=False)
+    print("Portfolio Types included:", portfolio_breakdown.index.tolist())
+    print("Values:", portfolio_breakdown.to_dict())
     pie_portfolio_data = {
         "labels": portfolio_breakdown.index.tolist(),
         "datasets": [{"label": "Value", "data": [float(x) for x in portfolio_breakdown.values]}]
@@ -79,6 +84,8 @@ def prepare_saving_pie_charts(s_df: pd.DataFrame) -> tuple[dict, dict, dict]:
 
     retire_df = s_df[s_df["TYPE"].str.upper().isin(RETIREMENT_SET)]
     retire_breakdown = retire_df.groupby(retire_df["TYPE"].str.upper())["CURRENT_VALUE"].sum().sort_values(ascending=False)
+    print("Retirement Types included:", retire_breakdown.index.tolist())
+    print("Values:", retire_breakdown.to_dict())
     pie_retirement_data = {
         "labels": retire_breakdown.index.tolist(),
         "datasets": [{"label": "Value", "data": [float(x) for x in retire_breakdown.values]}]
@@ -87,12 +94,17 @@ def prepare_saving_pie_charts(s_df: pd.DataFrame) -> tuple[dict, dict, dict]:
     return pie_invest_data, pie_portfolio_data, pie_retirement_data
 
 
-def monthly_trends(exp_df, inv_df, income_df, loans_df, bank_balance):
+def monthly_trends(exp_df, inv_df, income_df, loans_df, bank_balance, inrst_df, tax_df):
     print("Preparing Financial Monthly Trend Chart")
     series = {}
     if not exp_df.empty:
         ex = exp_df.groupby(exp_df["DATE"].dt.to_period("M"))["COST"].sum()
         series["Expense"] = ex
+    if not inrst_df.empty:
+        in_df = inrst_df.groupby(inrst_df["DATE"].dt.to_period("M"))["COST_IN"].sum()
+        series["INTEREST_IN"] = in_df
+        out_df = inrst_df.groupby(inrst_df["DATE"].dt.to_period("M"))["COST_OUT"].sum()
+        series["INTEREST_OUT"] = out_df
     if not inv_df.empty:
         inv_df["YM"] = inv_df["DATE"].dt.to_period("M")
         buy = inv_df[inv_df["TYPE_OF_ORDER"]=="BUY"].groupby("YM")["COST"].sum()
@@ -102,6 +114,9 @@ def monthly_trends(exp_df, inv_df, income_df, loans_df, bank_balance):
     if not income_df.empty:
         inc = income_df.groupby(income_df["DATE"].dt.to_period("M"))["AMOUNT"].sum()
         if not inc.empty: series["Income"] = inc
+    if not tax_df.empty:
+        tax = tax_df.groupby(tax_df["DATE"].dt.to_period("M"))["AMOUNT"].sum()
+        if not tax.empty: series["Tax"] = tax
     if not loans_df.empty and loans_df["DATE"].notna().any():
         ln = loans_df.dropna(subset=["DATE"]).groupby(loans_df["DATE"].dt.to_period("M"))["LOAN_AMOUNT"].sum()
         if not ln.empty: series["Loan"] = ln

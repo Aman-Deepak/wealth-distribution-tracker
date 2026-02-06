@@ -71,6 +71,7 @@ def process_expense_file(filepath: str, user_id: int, db: Session, last_updated_
         sorted_fys = sorted(inserted_fys, key=lambda x: int(x.split('-')[0]))
         print(f"✅ Expenses inserted successfully for FYs: {', '.join(sorted_fys)}")
     else:
+        sorted_fys = None
         print("ℹ️ No new expenses found after last updated date.")
     return sorted_fys
 

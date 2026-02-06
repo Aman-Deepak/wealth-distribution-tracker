@@ -51,7 +51,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         print(f"❌ No user found in DB for username: {username}")
         raise credentials_exception
 
-    print(f"✅ Authenticated user: {user.username}")
+    print(f"✅ Authenticated user: {user.username} userId: {user.id}")
     return user
 
 

@@ -13,10 +13,11 @@ from app.services.charts import (
 from app.services.expense import fetch_expense_data
 from app.services.income import fetch_income_data
 from app.services.loan import fetch_loan_data
-from app.services.income import fetch_income_data
+from app.services.income import fetch_income_data, fetch_tax_data
 from app.services.config import get_yearly_closing_balance
 from app.services.summary import fetch_savings_data
 from app. services.invest import fetch_invest_data
+from app.services.interest import fetch_interest_data
 
 router = APIRouter(prefix="/charts", tags=["Charts"])
 
@@ -34,6 +35,8 @@ def get_chart_data(
     loan_df = fetch_loan_data(user_id=user_id, db=db)
     invest_df = fetch_invest_data(user_id=user_id, db=db)
     inc_df = fetch_income_data(user_id=user_id, db=db)
+    inrst_df = fetch_interest_data(user_id=user_id, db=db)
+    tax_df = fetch_tax_data(user_id=user_id, db=db)
     bank_balance = None
     try:
         bank_balance = get_yearly_closing_balance(user_id=user_id, db=db).closing_balance
@@ -58,9 +61,10 @@ def get_chart_data(
             return {"invest_breakdown": pie1, "portfolio_breakdown": pie2, "retirement_breakdown": pie3}
 
         if req.chart_name == "financial_monthly_trends":
-            return monthly_trends(exp_df, invest_df, inc_df, loan_df, bank_balance)
+            return monthly_trends(exp_df, invest_df, inc_df, loan_df, bank_balance, inrst_df, tax_df)
 
         raise HTTPException(404, f"Unknown chart_name: {req.chart_name}")
 
     except Exception as e:
+        print(f"ERROR---{e}")
         raise HTTPException(500, str(e))

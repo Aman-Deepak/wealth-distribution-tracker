@@ -15,7 +15,7 @@ def get_navs(db: Session = Depends(get_db)):
 
 @router.post("/nav", response_model=NAVOut)
 def add_nav(nav_data: NAVCreate, db: Session = Depends(get_db)):
-    return config.add_nav(nav_data.dict(), db)
+    return config.add_navs(nav_data.dict(), db)
 
 @router.put("/nav/update", response_model=List[NAVOut])
 def update_navs(db: Session = Depends(get_db)):
@@ -23,6 +23,13 @@ def update_navs(db: Session = Depends(get_db)):
 
 
 # ------------------- Yearly Closing Bank Balance -------------------
+
+@router.get("/list/yearly-closing-bank-balance", response_model=List[YearlyClosingBankBalanceOut])
+def get_yearly_closing_balance(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return config.get_all_yearly_closing_balance(current_user.id, db)
 
 @router.get("/yearly-closing-bank-balance", response_model=YearlyClosingBankBalanceOut)
 def get_yearly_closing_balance(

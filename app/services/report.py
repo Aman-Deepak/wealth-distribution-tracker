@@ -1,8 +1,9 @@
 from app.services.invest import fetch_invest_data
 from app.services.expense import fetch_expense_data
 from app.services.summary import fetch_savings_data, fetch_yearly_distribution_data
-from app.services.income import fetch_income_data
+from app.services.income import fetch_income_data, fetch_tax_data
 from app.services.loan import fetch_loan_data
+from app.services.interest import fetch_interest_data
 from app.services.insights import *
 from app.services.charts import *
 from app.services.tables import *
@@ -163,6 +164,8 @@ def generate_financial_report(user_id: int, db: Session) -> str:
     yearly_df = fetch_yearly_distribution_data(user_id=user_id, db=db)
     loans_df = fetch_loan_data(user_id=user_id, db=db)
     bank_balance = get_yearly_closing_balance(user_id=user_id, db=db).closing_balance
+    inrst_df = fetch_interest_data(user_id=user_id, db=db)
+    tax_df = fetch_tax_data(user_id=user_id, db=db)
 
     summary_card_data = calculate_summary(exp_df=exp_df, sav_df=sav_df, loans_df=loans_df, bank_balance=bank_balance)
     summary_cards = financial_summary_card(summary_card_data)
@@ -175,7 +178,7 @@ def generate_financial_report(user_id: int, db: Session) -> str:
     invest_pie_data, portfolio_pie_data, retirement_pie_data = prepare_saving_pie_charts(sav_df)
 
     # Monthly trends
-    monthly_trend_data = monthly_trends(exp_df, inv_df, income_df, loans_df, bank_balance)
+    monthly_trend_data = monthly_trends(exp_df, inv_df, income_df, loans_df, bank_balance, inrst_df, tax_df)
 
     # Tables
     expense_table_html = generate_expense_table(exp_df)

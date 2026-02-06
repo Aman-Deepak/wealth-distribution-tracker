@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from app.api.v1.auth import get_current_user, get_db
 from app.db.models import UploadHistory
-from app.services.upload_files import upload_file
+from app.services.upload_files import upload_files
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 @router.post("/")
@@ -11,7 +11,7 @@ def upload_file(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    return upload_file(db, current_user.id, file)
+    return upload_files(db, current_user.id, file)
 
 
 @router.get("/history/")

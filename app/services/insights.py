@@ -26,7 +26,7 @@ def calculate_summary(exp_df: pd.DataFrame = None, sav_df: pd.DataFrame = None, 
 
     if exp_df is not None and not exp_df.empty:
         summary["TOTAL_EXPENSES"] = fmt_inr(safe_sum(exp_df.get("COST")))
-        summary["AVG_MONTHLY_EXPENSE"] = fmt_inr(round(exp_df.groupby(exp_df["DATE"].dt.to_period("M"))["COST"].sum().mean(), 2))
+        summary["AVG_MONTHLY_EXPENSE"] = fmt_inr(round(exp_df.groupby(exp_df["DATE"].dt.to_period("M"))["COST"].sum().tail(12).mean(), 2))
         summary["HIGHEST_EXPENSE_MONTH"] = exp_df.groupby(exp_df["DATE"].dt.strftime("%B %Y"))["COST"].sum().idxmax()
         summary["LOWEST_EXPENSE_MONTH"] = exp_df.groupby(exp_df["DATE"].dt.strftime("%B %Y"))["COST"].sum().idxmin()
 
@@ -37,7 +37,7 @@ def calculate_summary(exp_df: pd.DataFrame = None, sav_df: pd.DataFrame = None, 
         summary["WEIGHTED_RETURN"] = f"{fmt_inr(weighted_invest_return_pct(sav_df))}%"
         summary["PROFIT_BOOKED_SUM"] = fmt_inr(safe_sum(sav_df.get("PROFIT_BOOKED")))
         summary["TOTAL_WEALTH"] = fmt_inr(safe_sum(sav_df.get("CURRENT_VALUE")))
-        summary["LIQUID_WEALTH"] = fmt_inr(safe_sum(sav_df[sav_df["TYPE"].isin({"BANK","MUTUALFUND","RD"})]["CURRENT_VALUE"]))
+        summary["LIQUID_WEALTH"] = fmt_inr(safe_sum(sav_df[sav_df["TYPE"].isin({"Bank","MUTUALFUND","RD","FD"})]["CURRENT_VALUE"]))
 
     if loans_df is not None and not loans_df.empty:
         summary["TOTAL_LOANS"] = fmt_inr(safe_sum(loans_df.get("LOAN_AMOUNT")) - safe_sum(loans_df.get("LOAN_REPAYMENT")))

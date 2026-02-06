@@ -34,13 +34,16 @@ def generate_report(
     return {"message": f"{report_type.capitalize()} report generated", "filename": filename}
 
 @router.get("/list/")
-def list_reports():
+def list_reports(
+    current_user: dict = Depends(get_current_user)
+):
     """
     List all generated reports.
     """
+    user_id = current_user.id
     reports = []
     for file in os.listdir(GENERATED_DIR):
-        if file.endswith(".html"):
+       if user_id in file and file.endswith(".html"):
             reports.append({"filename": file, "path": os.path.join(GENERATED_DIR, file)})
     return reports
 
