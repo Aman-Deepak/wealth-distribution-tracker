@@ -32,6 +32,7 @@ def process_mutualfund_file(filepath: str, user_id: int, db: Session, last_updat
     print(f"📂 Reading mutual fund CSV file: {filepath}")
     df = pd.read_csv(filepath)
     inserted_fys = set()
+    latest_date = None
     df.columns = df.columns.str.upper().str.strip()
     print(f"📄 Processing mutual fund file with {len(df)} rows")
     required_cols = {'DATE', 'FOLIO NUMBER', 'NAME OF THE FUND', 'ORDER', 'UNITS', 'NAV',
@@ -46,6 +47,10 @@ def process_mutualfund_file(filepath: str, user_id: int, db: Session, last_updat
     print(f"📄 Inserting {len(df)} rows that matched condition (date > {last_updated_date}) for mutual fund file.")
 
     for _, row in df.iloc[::-1].iterrows():
+        row_date = row["DATE"]
+        # Track the latest date
+        if latest_date is None or row_date > latest_date:
+            latest_date = row_date
         year = str(row["DATE"].year)
         month = str(row["DATE"].month).zfill(2)
         day = str(row["DATE"].day).zfill(2)
@@ -72,10 +77,11 @@ def process_mutualfund_file(filepath: str, user_id: int, db: Session, last_updat
     if inserted_fys:
         sorted_fys = sorted(inserted_fys, key=lambda x: int(x.split('-')[0]))
         print(f"✅ Mutualfund data inserted successfully for FYs: {', '.join(sorted_fys)}")
-        return sorted_fys
+        print(f"📅 Latest Mutualfund date: {latest_date}")
+        return sorted_fys, latest_date
     else:
         print("ℹ️ No new Mutualfund data found after last updated date.")
-        return []
+        return [], latest_date
 
 
 # ---------- Data Fetch ----------

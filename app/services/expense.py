@@ -28,6 +28,7 @@ def process_expense_file(filepath: str, user_id: int, db: Session, last_updated_
     print(f"📂 Reading expense file: {filepath} for user: {user_id}")
     xl = pd.ExcelFile(filepath)
     inserted_fys = set()
+    latest_date = None
 
     for sheet in xl.sheet_names:
         df = xl.parse(sheet)
@@ -48,6 +49,10 @@ def process_expense_file(filepath: str, user_id: int, db: Session, last_updated_
         print(f"📄 Inserting {len(df)} rows that matched condition (date > {last_updated_date}) for sheet: {sheet}.")
 
         for _, row in df.iterrows():
+            row_date = row["DATE"]
+            # Track the latest date
+            if latest_date is None or row_date > latest_date:
+                latest_date = row_date
             year = str(row["DATE"].year)
             month = str(row["DATE"].month).zfill(2)
             day = str(row["DATE"].day).zfill(2)
@@ -70,10 +75,11 @@ def process_expense_file(filepath: str, user_id: int, db: Session, last_updated_
     if inserted_fys:
         sorted_fys = sorted(inserted_fys, key=lambda x: int(x.split('-')[0]))
         print(f"✅ Expenses inserted successfully for FYs: {', '.join(sorted_fys)}")
+        print(f"📅 Latest expense date: {latest_date}")
     else:
         sorted_fys = None
         print("ℹ️ No new expenses found after last updated date.")
-    return sorted_fys
+    return sorted_fys, latest_date
 
 
 

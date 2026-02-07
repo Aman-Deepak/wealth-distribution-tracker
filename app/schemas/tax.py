@@ -1,19 +1,20 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class IncomeBase(BaseModel):
+class TaxBase(BaseModel):
     financial_year: str
     year: str
     month: str
     day: str
     name: str
     type: str
-    amount: float
+    amount: Optional[float] = None
+    refund: Optional[float] = None
 
-class IncomeCreate(IncomeBase):
+class TaxCreate(TaxBase):
     pass
 
-class IncomeOut(IncomeBase):
+class TaxOut(TaxBase):
     id: int
 
     class Config:

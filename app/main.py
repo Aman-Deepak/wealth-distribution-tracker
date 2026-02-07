@@ -19,6 +19,7 @@ from app.api.v1.config import router as config_router
 from app.api.v1.charts import router as charts_router
 from app.api.v1.tables import router as tables_router
 from app.api.v1.interest import router as interest_router
+from app.api.v1.tax import router as tax_router
 
 
 app = FastAPI(title="Wealth Tracker API")
@@ -45,6 +46,7 @@ app.include_router(config_router)
 app.include_router(charts_router)
 app.include_router(tables_router)
 app.include_router(interest_router)
+app.include_router(tax_router)
 
 # Optional: Customize OpenAPI to show Bearer token properly
 def custom_openapi():

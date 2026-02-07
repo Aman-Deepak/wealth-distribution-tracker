@@ -53,8 +53,10 @@ def update_config_date(db: Session, user_id: int, field_name: str=None, value: d
         raise AttributeError(f"Config has no field '{field_name}'")
 
     # update the target field
-    if field_name:
-        setattr(config, field_name, value)
+    if field_name and value:
+        updated_date = getattr(config, field_name)
+        updated_date = max(value, updated_date)
+        setattr(config, field_name, updated_date)
 
     # always update last_updated_date to today
     config.last_updated_date = get_today_datetime()

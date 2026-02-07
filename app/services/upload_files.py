@@ -75,14 +75,14 @@ def process_uploaded_file(filepath: str, file_type: str, user_id: int, db: Sessi
     Config = get_config_last_updated_date(db, user_id)
 
     if file_type == "expenses":
-        fy_list = process_expense_file(filepath, user_id, db, Config.expense_last_updated_date)
-        update_config_date(db, user_id, field_name="expense_last_updated_date", value=date.today())
+        fy_list, latest_date = process_expense_file(filepath, user_id, db, Config.expense_last_updated_date)
+        update_config_date(db, user_id, field_name="expense_last_updated_date", value=latest_date)
     elif file_type == "financial_data":
-        fy_list = process_financial_data_file(filepath, user_id, db, Config.financial_last_updated_date)
-        update_config_date(db, user_id, field_name="financial_last_updated_date", value=date.today())
+        fy_list, latest_date = process_financial_data_file(filepath, user_id, db, Config.financial_last_updated_date)
+        update_config_date(db, user_id, field_name="financial_last_updated_date", value=latest_date)
     elif file_type == "mutualfund":
-        fy_list = process_mutualfund_file(filepath, user_id, db, Config.invest_last_updated_date)
-        update_config_date(db, user_id, field_name="invest_last_updated_date", value=date.today())
+        fy_list, latest_date = process_mutualfund_file(filepath, user_id, db, Config.invest_last_updated_date)
+        update_config_date(db, user_id, field_name="invest_last_updated_date", value=latest_date)
 
     else:
         raise Exception(f"Unknown file type: {file_type}")
@@ -90,8 +90,7 @@ def process_uploaded_file(filepath: str, file_type: str, user_id: int, db: Sessi
     print("🔁 Updating summaries after data insert")
     for fy in fy_list or []:
         update_monthly_distributions(user_id, db, fy)
-        if file_type == "expenses":
-            reconcile_bank(user_id, db, fiscal_year=fy)
+        reconcile_bank(user_id, db, fiscal_year=fy)
     for fy in fy_list or []:
         update_yearly_distributions(user_id, db, fy)
 

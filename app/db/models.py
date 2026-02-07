@@ -1,4 +1,3 @@
-from decimal import Decimal
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import DECIMAL, Column, Integer, String, ForeignKey, Date, DateTime, UniqueConstraint, DECIMAL
 from sqlalchemy.orm import relationship
@@ -16,6 +15,7 @@ class User(Base):
 
 
     incomes = relationship("Income", back_populates="user")
+    taxes = relationship("Tax", back_populates="user")
     expenses = relationship("Expense", back_populates="user")
     investments = relationship("Invest", back_populates="user")
     interests = relationship("Interest", back_populates="user")
@@ -34,10 +34,26 @@ class Income(Base):
     year = Column(String(4))
     month = Column(String(2))
     day = Column(String(2))
-    salary = Column(DECIMAL(14, 4))
-    tax = Column(DECIMAL(14, 4))
+    name = Column(String(50))
+    type = Column(String(50))
+    amount = Column(DECIMAL(14, 4))
 
     user = relationship("User", back_populates="incomes")
+
+class Tax(Base):
+    __tablename__ = "tax"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    financial_year = Column(String(10))
+    year = Column(String(4))
+    month = Column(String(2))
+    day = Column(String(2))
+    name = Column(String(50))
+    type = Column(String(50))
+    amount = Column(DECIMAL(14, 4))
+    refund = Column(DECIMAL(14, 4))
+
+    user = relationship("User", back_populates="taxes")
 
 class Expense(Base):
     __tablename__ = "expense"
@@ -83,6 +99,7 @@ class Interest(Base):
     name = Column(String(100))
     cost_in = Column(DECIMAL(14, 4))
     cost_out = Column(DECIMAL(14, 4))
+    credit_in = Column(Integer)
 
     user = relationship("User", back_populates="interests")
 

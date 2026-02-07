@@ -1,11 +1,10 @@
 from sqlalchemy.orm import Session
 import pandas as pd
 from sqlalchemy import func, case
-from datetime import datetime
 from decimal import Decimal
 from app.db.models import (
     Income, Expense, Invest, Interest, Loan,
-    MonthlyDistribution, YearlyDistribution, Savings
+    MonthlyDistribution, YearlyDistribution, Savings, Tax
 )
 from collections import defaultdict
 from app.utils.helper_functions import to_decimal
@@ -14,6 +13,56 @@ from app.services.config import *
 # -----------------------------
 # Monthly Distribution
 # -----------------------------
+def adjust_tax_refund(user_id: int, db: Session, fy: str):
+    tax_data = db.query(
+        Tax.year, Tax.month,
+        func.sum(Tax.amount).label("tax")
+    ).filter(
+        Tax.user_id == user_id,
+        Tax.financial_year == fy
+    ).group_by(Tax.year, Tax.month).all()
+
+    # Query total refund for the financial year
+    total_refund = db.query(
+        func.sum(Tax.refund)
+    ).filter(
+        Tax.user_id == user_id,
+        Tax.financial_year == fy
+    ).scalar() or None
+
+    if total_refund is None:
+        return tax_data
+
+    # Calculate refund per month
+    num_months = len(tax_data)
+    refund_per_month = total_refund / num_months if num_months > 0 else Decimal("0.0")
+
+    # Adjust tax by subtracting refund, handling overflow
+    remaining_refund = Decimal("0.0")
+    adjusted_tax_data = []
+
+    for row in tax_data:
+        tax_amount = row.tax
+        applicable_refund = refund_per_month + remaining_refund
+        
+        if tax_amount >= applicable_refund:
+            # Tax can absorb the refund
+            adjusted_tax = tax_amount - applicable_refund
+            remaining_refund = Decimal("0.0")
+        else:
+            # Tax is less than refund, tax becomes 0 and carry forward excess refund
+            adjusted_tax = Decimal("0.0")
+            remaining_refund = applicable_refund - tax_amount
+        
+        adjusted_tax_data.append({
+            "year": row.year,
+            "month": row.month,
+            "tax": adjusted_tax
+        })
+
+    # Use adjusted_tax_data instead of tax_data
+    return adjusted_tax_data
+
 
 def fetch_monthly_distribution_data(user_id: int, db: Session, financial_year: str=None) -> pd.DataFrame:
     print(f'Fetching Monthly Distribution of user {user_id} for Finanacial Year: {financial_year}')
@@ -53,104 +102,110 @@ def update_monthly_distributions(user_id: int, db: Session, fy: str):
     def sum_case(model, column, value):
         """Helper for SUM(CASE WHEN ...) in SQLAlchemy 2.x"""
         return func.sum(case((column == value, model.cost), else_=Decimal("0.0")))
+    
+    try:
 
-    # ---- Gather data ----
-    invest_data = db.query(
-        Invest.year, Invest.month,
-        sum_case(Invest, Invest.type_of_order, "BUY").label("inv_buy"),
-        sum_case(Invest, Invest.type_of_order, "SELL").label("inv_sell")
-    ).filter(
-        Invest.user_id == user_id,
-        Invest.financial_year == fy
-    ).group_by(Invest.year, Invest.month).all()
+        # ---- Gather data ----
+        invest_data = db.query(
+            Invest.year, Invest.month,
+            sum_case(Invest, Invest.type_of_order, "BUY").label("inv_buy"),
+            sum_case(Invest, Invest.type_of_order, "SELL").label("inv_sell")
+        ).filter(
+            Invest.user_id == user_id,
+            Invest.financial_year == fy
+        ).group_by(Invest.year, Invest.month).all()
 
-    income_data = db.query(
-        Income.year, Income.month,
-        func.sum(Income.salary).label("income"),
-        func.sum(Income.tax).label("tax")
-    ).filter(
-        Income.user_id == user_id,
-        Income.financial_year == fy
-    ).group_by(Income.year, Income.month).all()
+        income_data = db.query(
+            Income.year, Income.month,
+            func.sum(Income.amount).label("income")
+        ).filter(
+            Income.user_id == user_id,
+            Income.financial_year == fy
+        ).group_by(Income.year, Income.month).all()
 
-    expense_data = db.query(
-        Expense.year, Expense.month,
-        func.sum(Expense.cost).label("expenses")
-    ).filter(
-        Expense.user_id == user_id,
-        Expense.financial_year == fy
-    ).group_by(Expense.year, Expense.month).all()
+        tax_data = adjust_tax_refund(user_id=user_id, db=db, fy=fy)
 
-    interest_data = db.query(
-        Interest.year, Interest.month,
-        func.sum(Interest.cost_in).label("interest_in"),
-        func.sum(Interest.cost_out).label("interest_out")
-    ).filter(
-        Interest.user_id == user_id,
-        Interest.financial_year == fy
-    ).group_by(Interest.year, Interest.month).all()
+        expense_data = db.query(
+            Expense.year, Expense.month,
+            func.sum(Expense.cost).label("expenses")
+        ).filter(
+            Expense.user_id == user_id,
+            Expense.financial_year == fy
+        ).group_by(Expense.year, Expense.month).all()
 
-    interest_credit_data = db.query(
-        Interest.year, Interest.month,
-        func.sum(Interest.cost_in).label("credit_in")
-    ).filter(
-        Interest.user_id == user_id,
-        Interest.financial_year == fy,
-        Interest.type.in_(("BANK", "BONDS"))
-    ).group_by(Interest.year, Interest.month).all()
+        interest_data = db.query(
+            Interest.year, Interest.month,
+            func.sum(Interest.cost_in).label("interest_in"),
+            func.sum(Interest.cost_out).label("interest_out")
+        ).filter(
+            Interest.user_id == user_id,
+            Interest.financial_year == fy
+        ).group_by(Interest.year, Interest.month).all()
 
-    loan_data = db.query(
-        Loan.year, Loan.month,
-        func.sum(Loan.loan_amount).label("loan_amount"),
-        func.sum(Loan.loan_repayment).label("loan_repayment")
-    ).filter(
-        Loan.user_id == user_id,
-        Loan.financial_year == fy
-    ).group_by(Loan.year, Loan.month).all()
+        interest_credit_data = db.query(
+            Interest.year, Interest.month,
+            func.sum(Interest.cost_in).label("credit_in")
+        ).filter(
+            Interest.user_id == user_id,
+            Interest.financial_year == fy,
+            Interest.credit_in == 1
+        ).group_by(Interest.year, Interest.month).all()
 
-    # ---- Merge into month_map ----
-    month_map = {}
-    for dataset in [invest_data, income_data, expense_data, interest_data, loan_data, interest_credit_data]:
-        for row in dataset:
-            key = (row.year, row.month)
-            if key not in month_map:
-                month_map[key] = {}
-            month_map[key].update(row._asdict())
+        loan_data = db.query(
+            Loan.year, Loan.month,
+            func.sum(Loan.loan_amount).label("loan_amount"),
+            func.sum(Loan.loan_repayment).label("loan_repayment")
+        ).filter(
+            Loan.user_id == user_id,
+            Loan.financial_year == fy
+        ).group_by(Loan.year, Loan.month).all()
 
-    # ---- Insert into MonthlyDistribution ----
-    count = 0
-    for (year, month), data in month_map.items():
-        count += 1
-        bank = Decimal(str(data.get("income", 0.0))) \
-             + Decimal(str(data.get("inv_sell", 0.0))) \
-             + Decimal(str(data.get("loan_amount", 0.0))) \
-             + Decimal(str(data.get("credit_in", 0.0))) \
-             - Decimal(str(data.get("inv_buy", 0.0))) \
-             - Decimal(str(data.get("expenses", 0.0))) \
-             - Decimal(str(data.get("loan_repayment", 0.0))) \
-             - Decimal(str(data.get("interest_out", 0.0))) \
-             - Decimal(str(data.get("tax", 0.0)))
+        # ---- Merge into month_map ----
+        month_map = {}
+        for dataset in [invest_data, income_data, expense_data, interest_data, loan_data, interest_credit_data, tax_data]:
+            for row in dataset:
+                key = (row.year, row.month)
+                if key not in month_map:
+                    month_map[key] = {}
+                month_map[key].update(row._asdict())
 
-        rec = MonthlyDistribution(
-            user_id=user_id,
-            financial_year=fy,
-            year=year,
-            month=month,
-            income=Decimal(str(data.get("income", 0.0))),
-            inv_buy=Decimal(str(data.get("inv_buy", 0.0))),
-            inv_sell=Decimal(str(data.get("inv_sell", 0.0))),
-            expenses=Decimal(str(data.get("expenses", 0.0))),
-            bank=bank,
-            tax=Decimal(str(data.get("tax", 0.0))),
-            interest_in=Decimal(str(data.get("interest_in", 0.0))),
-            interest_out=Decimal(str(data.get("interest_out", 0.0))),
-            loan_amount=Decimal(str(data.get("loan_amount", 0.0))),
-            loan_repayment=Decimal(str(data.get("loan_repayment", 0.0)))
-        )
-        db.add(rec)
+        # ---- Insert into MonthlyDistribution ----
+        count = 0
+        for (year, month), data in month_map.items():
+            count += 1
+            bank = Decimal(str(data.get("income", 0.0))) \
+                + Decimal(str(data.get("inv_sell", 0.0))) \
+                + Decimal(str(data.get("loan_amount", 0.0))) \
+                + Decimal(str(data.get("credit_in", 0.0))) \
+                - Decimal(str(data.get("inv_buy", 0.0))) \
+                - Decimal(str(data.get("expenses", 0.0))) \
+                - Decimal(str(data.get("loan_repayment", 0.0))) \
+                - Decimal(str(data.get("interest_out", 0.0))) \
+                - Decimal(str(data.get("tax", 0.0)))
+                
 
-    db.commit()
-    print(f"✅ Monthly distribution updated for FY {fy} count: {count}")
+            rec = MonthlyDistribution(
+                user_id=user_id,
+                financial_year=fy,
+                year=year,
+                month=month,
+                income=Decimal(str(data.get("income", 0.0))),
+                inv_buy=Decimal(str(data.get("inv_buy", 0.0))),
+                inv_sell=Decimal(str(data.get("inv_sell", 0.0))),
+                expenses=Decimal(str(data.get("expenses", 0.0))),
+                bank=bank,
+                tax=Decimal(str(data.get("tax", 0.0))),
+                interest_in=Decimal(str(data.get("interest_in", 0.0))),
+                interest_out=Decimal(str(data.get("interest_out", 0.0))),
+                loan_amount=Decimal(str(data.get("loan_amount", 0.0))),
+                loan_repayment=Decimal(str(data.get("loan_repayment", 0.0)))
+            )
+            db.add(rec)
+
+        db.commit()
+        print(f"✅ Monthly distribution updated for FY {fy} count: {count}")
+    except Exception as e:
+        print(f"Failed while updating monthly balance with error: {e}")
 
 
 
@@ -493,9 +548,7 @@ def calc_pf(name, txns, interest_in: Decimal, interest_out: Decimal):
         current_invested = diff
     else:
         profit_booked = abs(diff)
-    current_value = current_invested + (Decimal(interest_in or 0) - Decimal(interest_out or 0))
- 
-    
+    current_value = current_invested + (Decimal(interest_in or 0) - Decimal(interest_out or 0)) - profit_booked
     profit_loss = current_value - current_invested
 
     return {

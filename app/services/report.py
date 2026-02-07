@@ -1,8 +1,9 @@
 from app.services.invest import fetch_invest_data
 from app.services.expense import fetch_expense_data
 from app.services.summary import fetch_savings_data, fetch_yearly_distribution_data
-from app.services.income import fetch_income_data, fetch_tax_data
+from app.services.income import fetch_income_data
 from app.services.loan import fetch_loan_data
+from app.services.tax import fetch_tax_data
 from app.services.interest import fetch_interest_data
 from app.services.insights import *
 from app.services.charts import *

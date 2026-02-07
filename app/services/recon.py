@@ -60,7 +60,7 @@ def _fy_months_upto_today(fiscal_year: str):
     months = _fy_months(fiscal_year)
     if fiscal_year != get_current_financial_year():
         return months
-    t = date(2025, 4, 11)  #date.today()
+    t = date.today()
     cutoff = (str(t.year), f"{t.month:02d}")
     out = []
     for y, m in months:
@@ -76,126 +76,151 @@ def expense_adjustment_negative(
     amount: float,
     input_date: date = None
 ):
-    q = Decimal("0.0001")
-    amt = Decimal(str(amount)).copy_abs()
+    try:
+        q = Decimal("0.0001")
+        amt = Decimal(str(amount)).copy_abs()
 
-    # --- 1) Validate available total ---
-    total_available = (
-        db.query(func.coalesce(func.sum(Expense.cost), 0))
-        .filter(
-            Expense.user_id == user_id,
-            Expense.financial_year == fiscal_year,
-            Expense.type == "PERSONAL",
-            Expense.category == "ADJUSTED",
+        # --- 1) Validate available total ---
+        total_available = (
+            db.query(func.coalesce(func.sum(Expense.cost), 0))
+            .filter(
+                Expense.user_id == user_id,
+                Expense.financial_year == fiscal_year,
+                Expense.type == "PERSONAL",
+                Expense.category == "ADJUSTED",
+            )
+            .scalar()
+        ) or Decimal("0")
+        print(f"{fiscal_year} ADJUSTED Amount Available={total_available}, Amount to be reduce={amt}")
+
+        if amt > total_available:
+            raise ValueError(
+                f"Insufficient ADJUSTED in {fiscal_year}. "
+                f"Available={total_available}, required={amt}"
+            )
+
+        # --- 2) Decide the month set & order ---
+        if input_date:
+            from_y = str(input_date.year)
+            from_m = f"{input_date.month:02d}"
+
+            fy_of_date = compute_financial_year(from_y, from_m)
+            if fy_of_date != fiscal_year:
+                raise ValueError("input_date does not belong to the provided fiscal_year")
+
+            ordered = _fy_months(fiscal_year)
+            start = (from_y, from_m)
+            try:
+                idx = ordered.index(start)
+            except ValueError:
+                idx = next((i for i, (yy, mm) in enumerate(ordered) if yy == from_y and mm == from_m), 0)
+            months_to_process = ordered[idx:] + ordered[:idx]
+            greedy = True
+        else:
+            months_to_process = _fy_months_upto_today(fiscal_year)
+            greedy = False
+        
+        print(f"months_to_process: {months_to_process} in greedy: {greedy}")
+
+        # --- 3) Load existing ADJUSTED expenses for the FY into a map ---
+        rows = (
+            db.query(Expense)
+            .filter(
+                Expense.user_id == user_id,
+                Expense.financial_year == fiscal_year,
+                Expense.type == "PERSONAL",
+                Expense.category == "ADJUSTED",
+            )
+            .all()
         )
-        .scalar()
-    ) or Decimal("0")
+        exp_map = {(e.year, e.month): e for e in rows}
 
-    if amt > total_available:
-        raise ValueError(
-            f"Insufficient ADJUSTED in {fiscal_year}. "
-            f"Available={total_available}, required={amt}"
-        )
+        remaining = amt
 
-    # --- 2) Decide the month set & order ---
-    if input_date:
-        # ensure the date belongs to the same FY
-        from_y = str(input_date.year)
-        from_m = f"{input_date.month:02d}"
+        if greedy:
+            # Case A: date passed -> carry forward greedily across FY (with wrap)
+            for y, m in months_to_process:
+                if remaining <= Decimal("0.0001"):  # ✅ Use tolerance
+                    break
+                e = exp_map.get((y, m))
+                if not e or e.cost is None:
+                    continue
+                avail = Decimal(str(e.cost))
+                if avail <= 0:
+                    continue
+                take = min(avail, remaining)
+                e.cost = (avail - take).quantize(q, rounding=ROUND_HALF_UP)
+                remaining = (remaining - take).quantize(q, rounding=ROUND_HALF_UP)  # ✅ Quantize remaining
 
-        # your helper uses strings; keep it consistent:
-        fy_of_date = compute_financial_year(from_y, from_m)
-        if fy_of_date != fiscal_year:
-            raise ValueError("input_date does not belong to the provided fiscal_year")
+        else:
+            # Case B: no date -> equalized deduction with carry-forward
+            pool = []
+            for y, m in months_to_process:
+                e = exp_map.get((y, m))
+                avail = Decimal(str(e.cost)) if e and e.cost is not None else Decimal("0")
+                if avail > 0:
+                    pool.append([y, m, e, avail])
 
-        ordered = _fy_months(fiscal_year)
-        start = (from_y, from_m)
-        try:
-            idx = ordered.index(start)
-        except ValueError:
-            # If there is no explicit ADJUSTED record yet for that month,
-            # index() still works because we're indexing month coordinates, not rows.
-            idx = next(i for i, (yy, mm) in enumerate(ordered) if yy == from_y and mm == from_m)
-        # start from input month, go to end, then wrap to the beginning
-        months_to_process = ordered[idx:] + ordered[:idx]
-        greedy = True
-    else:
-        months_to_process = (
-            _fy_months_upto_today(fiscal_year) if fiscal_year == _current_fy()
-            else _fy_months(fiscal_year)
-        )
-        greedy = False
+            max_iterations = 100  # ✅ Add safety limit
+            iteration = 0
+            prev_remaining = None  # ✅ Track if we're making progress
+            
+            while remaining > Decimal("0.0001") and pool and iteration < max_iterations:
+                iteration += 1
+                
+                # ✅ Check if we're stuck (remaining not decreasing)
+                if prev_remaining is not None and remaining >= prev_remaining:
+                    print(f"⚠️ Warning: Loop stuck at remaining={remaining}, breaking")
+                    break
+                prev_remaining = remaining
+                
+                per = (remaining / Decimal(len(pool))).quantize(q, rounding=ROUND_HALF_UP)
+                
+                # ✅ If per is too small, just take from first available month
+                if per <= Decimal("0.0001"):
+                    y, m, e, avail = pool[0]
+                    take = min(avail, remaining)
+                    e.cost = (Decimal(str(e.cost)) - take).quantize(q, rounding=ROUND_HALF_UP)
+                    remaining = (remaining - take).quantize(q, rounding=ROUND_HALF_UP)
+                    break
 
-    # --- 3) Load existing ADJUSTED expenses for the FY into a map ---
-    rows = (
-        db.query(Expense)
-        .filter(
-            Expense.user_id == user_id,
-            Expense.financial_year == fiscal_year,
-            Expense.type == "PERSONAL",
-            Expense.category == "ADJUSTED",
-        )
-        .all()
-    )
-    exp_map = {(e.year, e.month): e for e in rows}
+                new_pool = []
+                for y, m, e, avail in pool:
+                    take = min(avail, per, remaining)
+                    e.cost = (Decimal(str(e.cost)) - take).quantize(q, rounding=ROUND_HALF_UP)
+                    remaining = (remaining - take).quantize(q, rounding=ROUND_HALF_UP)  # ✅ Quantize remaining
+                    
+                    new_avail = Decimal(str(e.cost))
+                    if new_avail > Decimal("0.0001"):  # ✅ Use tolerance
+                        new_pool.append([y, m, e, new_avail])
+                    
+                    if remaining <= Decimal("0.0001"):  # ✅ Break early if done
+                        break
+                
+                print(f"Iteration {iteration}: remaining={remaining}, pool_size={len(new_pool)}")
+                pool = new_pool
 
-    remaining = amt
+            if iteration >= max_iterations:
+                raise RuntimeError(f"Loop exceeded max iterations. Remaining={remaining}")
 
-    if greedy:
-        # Case A: date passed -> carry forward greedily across FY (with wrap)
-        for y, m in months_to_process:
-            if remaining <= 0:
-                break
-            e = exp_map.get((y, m))
-            if not e or e.cost is None:
-                continue
-            avail = Decimal(e.cost)
-            take = min(avail, remaining)
-            e.cost = (avail - take).quantize(q, rounding=ROUND_HALF_UP)
-            remaining -= take
+            # tiny rounding dust fallback
+            if remaining > Decimal("0.0001") and pool:
+                y, m, e, avail = pool[0]
+                take = min(avail, remaining)
+                e.cost = (Decimal(str(e.cost)) - take).quantize(q, rounding=ROUND_HALF_UP)
+                remaining = (remaining - take).quantize(q, rounding=ROUND_HALF_UP)
 
-    else:
-        # Case B: no date -> equalized deduction with carry-forward
-        # Build pool of months that currently have > 0 to deduct from
-        pool = []
-        for y, m in months_to_process:
-            e = exp_map.get((y, m))
-            avail = Decimal(e.cost) if e and e.cost is not None else Decimal("0")
-            if avail > 0:
-                pool.append([y, m, e, avail])
+        # ✅ Allow small rounding error
+        if remaining > Decimal("0.01"):
+            raise RuntimeError(f"Failed to allocate full deduction. Remaining={remaining}")
 
-        # Iteratively distribute equally; months that hit 0 drop out
-        while remaining > 0 and pool:
-            per = (remaining / Decimal(len(pool))).quantize(q, rounding=ROUND_HALF_UP)
-            if per == 0:
-                # avoid getting stuck on rounding
-                per = remaining / Decimal(len(pool))
-
-            new_pool = []
-            for y, m, e, avail in pool:
-                take = min(avail, per, remaining)
-                e.cost = (Decimal(e.cost) - take).quantize(q, rounding=ROUND_HALF_UP)
-                remaining -= take
-                new_avail = avail - take
-                if new_avail > 0:
-                    new_pool.append([y, m, e, new_avail])
-            pool = new_pool
-
-        # tiny rounding dust fallback
-        if remaining > 0 and pool:
-            # subtract tiny remainder from the first month that can take it
-            y, m, e, avail = pool[0]
-            take = min(avail, remaining)
-            e.cost = (Decimal(e.cost) - take).quantize(q, rounding=ROUND_HALF_UP)
-            remaining -= take
-
-    if remaining > 0:
-        # Should not happen because of the up-front validation, unless race-condition updates
-        raise RuntimeError(f"Failed to allocate full deduction. Remaining={remaining}")
-
-    db.commit()
-
-
+        db.commit()
+        print(f"✅ Successfully adjusted. Final remaining: {remaining}")
+        
+    except Exception as e:
+        print(f"Error while adjusting negative Expenses: {e}")
+        db.rollback()
+        raise ValueError(str(e))
 
 def upsert_expense(db: Session, user_id: int, fiscal_year: str, year: str, month: str, amount: float):
     """Insert or update Expense row for PERSONAL/ADJUSTED."""
